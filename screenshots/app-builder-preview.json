@@ -1,0 +1,38 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "Daybreak Row",
+      "hasCanvas": true,
+      "bodyTextLen": 292,
+      "bodyTextHash": "9ee63d634f95cbadd1568855488c0d3d26b9e6c1af3f0c99ec66a1f34ae16bd1",
+      "bodyTextPrefix": "COASTAL LIFE SIM Daybreak Row A rented walk-up, a shift that sta",
+      "horizontalOverflow": false,
+      "consoleErrors": [
+        "A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\n%s%s https://react.dev/link/hydration-mismatch \n\n  ...\n    <MatchImpl routeId=\"/\">\n      <MatchView router={{...}} match={{id:\"//\",ssr:true, ...}}>\n        <CatchBoundary getResetKey={function getResetKey} errorComponent={function AppErrorComponent} ...>\n          <MatchInnerImpl match={{id:\"//\",ssr:true, ...}}>\n            <Lazy>\n              <Home>\n                <GameScreen>\n                  <main className=\"fixed inse...\">\n                    <canvas>\n                    <Overlay>\n                      <div className=\"pointer-ev...\">\n                        <div>\n                        <div>\n                        <Title>\n                          <div className=\"absolute i...\">\n                            <section className=\"sheet poin...\">\n                              <p>\n                              <h1>\n                              <p>\n                              <label className=\"mt-5 block...\" htmlFor=\"life-name\">\n                                <input\n                                  id=\"life-name\"\n                                  value=\"Alex\"\n                                  maxLength={16}\n                                  onChange={function onChange}\n                                  className=\"mt-1 w-full rounded-2xl border border-line bg-paper-2 px-3 py-3 text-base...\"\n                                  autoComplete=\"off\"\n-                                 style={{caret-color:\"transparent\"}}\n                                >\n                              ...\n                        ...\n"
+      ],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "Daybreak Row",
+      "hasCanvas": true,
+      "bodyTextLen": 292,
+      "bodyTextHash": "9ee63d634f95cbadd1568855488c0d3d26b9e6c1af3f0c99ec66a1f34ae16bd1",
+      "bodyTextPrefix": "COASTAL LIFE SIM Daybreak Row A rented walk-up, a shift that sta",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}

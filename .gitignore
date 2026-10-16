@@ -1,0 +1,10 @@
+node_modules/
+.vercel/
+.tanstack/
+dist/
+work/
+coverage/
+*.log
+*.pid
+.DS_Store
+*.tsbuildinfo
