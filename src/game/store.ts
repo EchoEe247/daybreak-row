@@ -39,6 +39,7 @@ export const useUi = create<UiState>(() => ({
   caption: null,
   low: false,
   veil: 0,
+  transitionLabel: null,
 }));
 
 export type GameImpl = {

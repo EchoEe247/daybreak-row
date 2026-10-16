@@ -53,12 +53,19 @@ export function Overlay() {
       <div className="lens absolute inset-0" />
       {ui.low && ui.mode === "play" ? <div className="need-vignette absolute inset-0" /> : null}
       <div
-        className="absolute inset-0 bg-dusk-2 transition-opacity duration-300 motion-ok"
+        className={`absolute inset-0 z-30 flex items-center justify-center bg-dusk-2 transition-opacity duration-300 motion-ok ${ui.transitionLabel ? "pointer-events-auto" : "pointer-events-none"}`}
         style={{ opacity: ui.veil }}
-      />
+        aria-live="polite"
+      >
+        {ui.transitionLabel ? (
+          <div className="max-w-[85vw] rounded-xl border border-white/20 bg-dusk-2/80 px-5 py-3 text-center text-base font-medium text-paper">
+            {ui.transitionLabel}
+          </div>
+        ) : null}
+      </div>
       {ui.mode === "title" ? <Title /> : null}
       {ui.mode !== "title" ? <TopBar /> : null}
-      {ui.mode === "play" ? <PlayChrome /> : null}
+      {ui.mode === "play" && !ui.transitionLabel ? <PlayChrome /> : null}
       {ui.mode === "phone" ? <PhonePanel /> : null}
       {ui.mode === "pause" ? <PauseCard /> : null}
       {ui.mode === "dialogue" && ui.dialogue ? <Dialogue /> : null}

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { doorTransitionLabel, parseDoorAction, reconcileIndoorArrival } from "@/game/door-transition";
 import { CITY_LIMITS, CITY_STOPS, districtAt } from "@/game/city-layout";
 import { createActor, disposeActorMaterials, faceYaw, type Actor } from "@/game/actors";
 import { createAudio } from "@/game/audio";
@@ -18,6 +19,7 @@ import {
   resolveSleep,
   SHIFT_LINES,
   type Note,
+  type Action,
 } from "@/game/logic";
 import { bindGame, clearSave, loadSave, useUi, writeSave } from "@/game/store";
 import { sampleSky } from "@/game/time";
@@ -34,8 +36,13 @@ declare global {
       getCameraYaw: () => number;
       getFun: () => number;
       setPositionForQA: ((x: number, z: number) => void) | undefined;
+      setSceneForQA: ((place: PlaceId, x: number, z: number) => void) | undefined;
       getSpeed: () => number;
       getPosition: () => { x: number; z: number };
+      getPlace: () => PlaceId;
+      getCameraPosition: () => { x: number; y: number; z: number };
+      getTransition: () => { label: string | null; veil: number };
+      getInteractionQA: () => { promptId: string | null; promptKind: string | null; busyUntil: number; elapsed: number; mode: Mode; doorPhase: string | null };
       getTouchInput: () => { x: number; y: number; run: boolean; looking: boolean };
       setKeys: (codes: string[]) => void;
       setSteer?: (v: number) => void;
@@ -162,17 +169,34 @@ export function mountGame(canvas: HTMLCanvasElement) {
   let promptId: string | null = null;
   let promptKind: "act" | "npc" | null = null;
   let busyUntil = 0;
+  let doorTransition: { action: Action; phase: "closing" | "opening"; deadline: number } | null = null;
   let saveMinute = -999;
   const camPos = new THREE.Vector3();
   const camDest = new THREE.Vector3();
   const look = new THREE.Vector3();
   const focus = new THREE.Vector3();
 
+  // A scene switch must never interpolate the camera hundreds of metres across world space.
   function snapCam(s: GameState) {
-    const dist = 4.55;
-    const horiz = Math.cos(camPitch) * dist;
-    const y = Math.sin(camPitch) * dist;
-    camPos.set(s.x + Math.sin(camYaw) * horiz, 1.2 + y, s.z + Math.cos(camYaw) * horiz);
+    const indoor = s.place !== "street";
+    const dist = indoor ? 4.15 : 4.55;
+    const pitch = indoor ? 0.75 : camPitch;
+    const horiz = Math.cos(pitch) * dist;
+    const dx = Math.sin(camYaw) * horiz;
+    const dz = Math.cos(camYaw) * horiz;
+    const clip = camClip(s.x, s.z, s.x + dx, s.z + dz, world.colliders[s.place]);
+    camPos.set(s.x + dx * clip, indoor ? 5.3 : 1.15 + Math.sin(pitch) * dist * clip, s.z + dz * clip);
+    if (s.place !== "street") {
+      const room = rooms[s.place];
+      camPos.x = THREE.MathUtils.clamp(camPos.x, room.x0 + 0.32, room.x1 - 0.32);
+      camPos.z = THREE.MathUtils.clamp(camPos.z, room.z0 + 0.32, room.z1 - 0.32);
+      camPos.y = 5.3;
+    }
+    camDest.copy(camPos);
+    camera.position.copy(camPos);
+    camera.fov = indoor ? 68 : 52;
+    camera.updateProjectionMatrix();
+    camera.lookAt(s.x, 1.25, s.z);
   }
 
   function sim(): GameState {
@@ -248,14 +272,16 @@ export function mountGame(canvas: HTMLCanvasElement) {
   }
 
   function begin(state: GameState) {
-    play = state;
+    play = reconcileIndoorArrival(state);
+    doorTransition = null;
+    useUi.setState({ veil: 0, transitionLabel: null, prompt: null });
     mode = "play";
-    camYaw = state.yaw;
+    camYaw = play.yaw;
     camPitch = 0.32;
     speed = 0;
     seq = null;
     dialogueNpc = null;
-    snapCam(state);
+    snapCam(play);
     audio.unlock();
     audio.chime();
     remember();
@@ -348,7 +374,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
   });
 
   function triggerInteract() {
-    if (!play || mode !== "play" || elapsed < busyUntil) return;
+    if (!play || mode !== "play" || elapsed < busyUntil || doorTransition) return;
     if (!promptId || !promptKind) return;
     if (promptKind === "npc") {
       const npc = promptId as NpcId;
@@ -363,6 +389,18 @@ export function mountGame(canvas: HTMLCanvasElement) {
     }
     const action = actions.find((a) => a.id === promptId);
     if (!action) return;
+    if (parseDoorAction(action.id)) {
+      // Fade OUT on the old scene before changing the world, then snap the camera.
+      doorTransition = { action, phase: "closing", deadline: performance.now() + 280 };
+      speed = 0;
+      input.interactQueued = false;
+      input.lookDx = 0;
+      input.lookDy = 0;
+      promptId = null;
+      promptKind = null;
+      useUi.setState({ veil: 1, prompt: null, transitionLabel: doorTransitionLabel(action.id) });
+      return;
+    }
     const result = action.run(play);
     showNotes(result.notes);
     audio.blip(result.seq ? 300 : 610);
@@ -399,8 +437,28 @@ export function mountGame(canvas: HTMLCanvasElement) {
     getFun: () => sim().needs.fun,
     // Deterministic QA setup only; never enabled in the regular gameplay URL.
     setPositionForQA: new URLSearchParams(window.location.search).has("touchqa") ? (x, z) => { if (play) { play.x = x; play.z = z; } } : undefined,
+    setSceneForQA: new URLSearchParams(window.location.search).has("touchqa") ? (place, x, z) => {
+      if (!play) return;
+      play.place = place;
+      play.x = x;
+      play.z = z;
+      play.yaw = 0;
+      camYaw = 0;
+      speed = 0;
+      busyUntil = 0;
+      doorTransition = null;
+      promptId = null;
+      promptKind = null;
+      useUi.setState({ veil: 0, transitionLabel: null, prompt: null });
+      snapCam(play);
+      sync(true);
+    } : undefined,
     getSpeed: () => speed,
     getPosition: () => ({ x: sim().x, z: sim().z }),
+    getPlace: () => sim().place,
+    getCameraPosition: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z }),
+    getTransition: () => ({ label: useUi.getState().transitionLabel, veil: useUi.getState().veil }),
+    getInteractionQA: () => ({ promptId, promptKind, busyUntil, elapsed, mode, doorPhase: doorTransition?.phase ?? null }),
     getTouchInput: () => ({ x: input.stickX, y: input.stickY, run: input.runHeld, looking: input.pointerLooking }),
     setKeys: (codes) => {
       input.keys.clear();
@@ -414,6 +472,37 @@ export function mountGame(canvas: HTMLCanvasElement) {
 
   function tick(dt: number) {
     elapsed += dt;
+
+    if (doorTransition && play && performance.now() >= doorTransition.deadline) {
+      if (doorTransition.phase === "closing") {
+        const result = doorTransition.action.run(play);
+        showNotes(result.notes);
+        camYaw = play.yaw;
+        camPitch = play.place === "street" ? 0.32 : 0.35;
+        speed = 0;
+        input.keys.clear();
+        input.stickX = 0;
+        input.stickY = 0;
+        input.runHeld = false;
+        input.interactQueued = false;
+        input.pointerLooking = false;
+        input.lookDx = 0;
+        input.lookDy = 0;
+        promptId = null;
+        promptKind = null;
+        useUi.setState({ prompt: null });
+        snapCam(play);
+        remember();
+        busyUntil = elapsed + 0.16;
+        doorTransition = { ...doorTransition, phase: "opening", deadline: performance.now() + 370 };
+        useUi.setState({ veil: 0 });
+        sync(true);
+      } else {
+        doorTransition = null;
+        busyUntil = elapsed; // exit is outside the entrance radius, so no artificial input dead time
+        useUi.setState({ transitionLabel: null });
+      }
+    }
     const title = mode === "title" || !play;
 
     if (!title && play && (mode === "play" || mode === "sleep" || mode === "shift")) {
@@ -446,7 +535,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       }
     }
 
-    const canMove = !!play && mode === "play" && elapsed >= busyUntil && !seq;
+    const canMove = !!play && mode === "play" && elapsed >= busyUntil && !seq && !doorTransition;
     if (canMove && play) {
       const move = readMove();
       const fwdX = -Math.sin(camYaw);
@@ -502,7 +591,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       }
     }
 
-    if (play && mode === "play") {
+    if (play && mode === "play" && !doorTransition) {
       let bestD = 1e9;
       let label: string | null = null;
       promptId = null;
@@ -569,8 +658,8 @@ export function mountGame(canvas: HTMLCanvasElement) {
         camYaw += diff * (1 - Math.exp(-2 * dt));
       }
       const indoor = play.place !== "street";
-      const dist = indoor ? 2.65 : 4.55;
-      const pitchUse = indoor ? Math.min(camPitch, 0.36) : camPitch;
+      const dist = indoor ? 4.15 : 4.55;
+      const pitchUse = indoor ? 0.75 : camPitch;
       const horiz = Math.cos(pitchUse) * dist;
       const yLift = Math.sin(pitchUse) * dist;
       const wantX = play.x + Math.sin(camYaw) * horiz;
@@ -578,9 +667,18 @@ export function mountGame(canvas: HTMLCanvasElement) {
       const clip = camClip(play.x, play.z, wantX, wantZ, world.colliders[play.place]);
       const destX = play.x + (wantX - play.x) * clip;
       const destZ = play.z + (wantZ - play.z) * clip;
-      let destY = 1.15 + yLift * clip;
-      if (indoor) destY = Math.min(destY, 2.15);
+      const destY = indoor ? 5.3 : 1.15 + yLift * clip;
       camDest.set(destX, destY, destZ);
+      if (indoor) {
+        const room = rooms[play.place as Exclude<PlaceId, "street">];
+        camDest.x = THREE.MathUtils.clamp(camDest.x, room.x0 + 0.32, room.x1 - 0.32);
+        camDest.z = THREE.MathUtils.clamp(camDest.z, room.z0 + 0.32, room.z1 - 0.32);
+      }
+      const wantedFov = indoor ? 68 : 52;
+      if (camera.fov !== wantedFov) {
+        camera.fov = wantedFov;
+        camera.updateProjectionMatrix();
+      }
       if (camPos.lengthSq() < 0.01) camPos.copy(camDest);
       camPos.lerp(camDest, 1 - Math.exp(-6 * dt));
       camera.position.copy(camPos);

@@ -27,8 +27,8 @@ export const rooms: Record<RoomId, Room> = {
     x1: 3.55,
     z0: 420.25,
     z1: 427.05,
-    spawn: { x: 0, z: 425.7, yaw: 0 },
-    exit: { x: apt.door, z: apt.zFront + 1.35, yaw: Math.PI },
+    spawn: { x: 1.35, z: 425.1, yaw: 0 },
+    exit: { x: apt.door, z: apt.zFront + 2.8, yaw: Math.PI },
     door: { x: 0, z: 426.35 },
   },
   cafe: {
@@ -36,8 +36,8 @@ export const rooms: Record<RoomId, Room> = {
     x1: 4.4,
     z0: 520.25,
     z1: 528.1,
-    spawn: { x: 0.2, z: 526.7, yaw: 0 },
-    exit: { x: cafeB.door, z: cafeB.zFront + 1.35, yaw: Math.PI },
+    spawn: { x: 0, z: 524.0, yaw: 0 },
+    exit: { x: cafeB.door, z: cafeB.zFront + 2.8, yaw: Math.PI },
     door: { x: 0, z: 527.35 },
   },
   market: {
@@ -45,8 +45,8 @@ export const rooms: Record<RoomId, Room> = {
     x1: 4.1,
     z0: 620.25,
     z1: 627.4,
-    spawn: { x: -0.4, z: 626.2, yaw: 0 },
-    exit: { x: marketB.door, z: marketB.zFront - 1.35, yaw: 0 },
+    spawn: { x: -0.4, z: 624.6, yaw: 0 },
+    exit: { x: marketB.door, z: marketB.zFront - 2.8, yaw: 0 },
     door: { x: -0.2, z: 626.7 },
   },
   office: {
@@ -54,8 +54,8 @@ export const rooms: Record<RoomId, Room> = {
     x1: 5.1,
     z0: 720.25,
     z1: 729.2,
-    spawn: { x: 0, z: 727.8, yaw: 0 },
-    exit: { x: officeB.door, z: officeB.zFront + 1.35, yaw: Math.PI },
+    spawn: { x: 0, z: 725.5, yaw: 0 },
+    exit: { x: officeB.door, z: officeB.zFront + 2.8, yaw: Math.PI },
     door: { x: 0.4, z: 728.4 },
   },
 };

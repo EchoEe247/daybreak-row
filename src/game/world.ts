@@ -401,6 +401,7 @@ export function buildWorld(scene: THREE.Scene): World {
   const citizen = makeCitizen();
   scene.add(citizen.group);
 
+  const roomCeilings: { id: PlaceId; mesh: THREE.Mesh }[] = [];
   function furnishRoom(id: PlaceId, ox: number, oz: number, x0: number, x1: number, z0: number, z1: number) {
     const wall = plasterMat;
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0 + 0.8, z1 - z0 + 0.8), floorMat);
@@ -416,6 +417,7 @@ export function buildWorld(scene: THREE.Scene): World {
       m.castShadow = true;
       m.receiveShadow = true;
       scene.add(m);
+      return m;
     };
     const t = 0.22;
     const h = 2.75;
@@ -423,7 +425,8 @@ export function buildWorld(scene: THREE.Scene): World {
     addShell((x0 + x1) / 2, h / 2, z1 + t / 2, x1 - x0 + t * 2, h, t);
     addShell(x0 - t / 2, h / 2, (z0 + z1) / 2, t, h, z1 - z0);
     addShell(x1 + t / 2, h / 2, (z0 + z1) / 2, t, h, z1 - z0);
-    addShell((x0 + x1) / 2, h, (z0 + z1) / 2, x1 - x0, t, z1 - z0);
+    const ceiling = addShell((x0 + x1) / 2, h, (z0 + z1) / 2, x1 - x0, t, z1 - z0);
+    roomCeilings.push({ id, mesh: ceiling });
     colliders[id].push({ minX: x0 - t, maxX: x0, minZ: z0, maxZ: z1 });
     colliders[id].push({ minX: x1, maxX: x1 + t, minZ: z0, maxZ: z1 });
     colliders[id].push({ minX: x0, maxX: x1, minZ: z0 - t, maxZ: z0 });
@@ -590,6 +593,8 @@ export function buildWorld(scene: THREE.Scene): World {
     (skyMat.uniforms.uHorizon.value as THREE.Color).set(skySample.horizon);
     (skyMat.uniforms.uSun.value as THREE.Vector3).set(skySample.sun.x, skySample.sun.y, skySample.sun.z);
     skyMat.uniforms.uStars.value = skySample.stars;
+    // Hide only the active interior ceiling for a clear room-aware, elevated camera.
+    for (const entry of roomCeilings) entry.mesh.visible = entry.id !== place;
     const elev = skySample.elev;
     const day = THREE.MathUtils.clamp(elev, 0, 1);
     sun.intensity = 0.15 + day * 3.1;

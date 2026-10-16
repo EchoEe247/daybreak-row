@@ -57,3 +57,11 @@ The original coastal Daybreak Row neighborhood remains available. A connected ma
 **QA:** Run `npm run test:city`, `npm run typecheck`, `npm run build`. Portrait phone review at 360x740, original controls and legacy save preserved; no physical-device frame-rate claim without direct device testing.
 
 **Implementation constraints:** Browser-based Three.js, no new APK and no external assets. This is the first major connected-city pass, not a simulation of every city service, enterable building, or traffic collision.
+## Clean building entry / exit update
+- Fully verified entrance and exit paths for the four original enterable interiors: apartment, Harbor Cafe, Cho's Market and Northline Office.
+- Door interaction begins a timed fade-out **before** the location changes, snaps the camera at blackout, then fades back in while blocking input. No long camera interpolation across hundreds of world units.
+- Distinct arrival positions in the room avoid an immediate exit prompt; exterior arrivals land outside the entrance's trigger radius, on the sidewalk.
+- Active interior roof/ceiling is hidden for an elevated, wider-angle, room-aware camera; outdoors retains the original street camera.
+- Old version-1 saves with a character directly on an indoor exit are relocated to the safe interior arrival, preserving the other save fields. Save format remains version 1.
+- Quick regression: `npm run test:doors`, `npm run typecheck`, `npm run build`. Browser QA covered all eight enter/exit paths with state/position/camera receipts. Touchscreen feel on the physical Pixel still requires direct user test.
+- New city expansion buildings still remain exterior scenery until enterable interiors are explicitly implemented for them.

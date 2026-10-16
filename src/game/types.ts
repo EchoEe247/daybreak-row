@@ -78,4 +78,5 @@ export type UiState = {
   caption: string | null;
   low: boolean;
   veil: number;
+  transitionLabel: string | null;
 };
