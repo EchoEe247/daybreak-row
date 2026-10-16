@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { CITY_LIMITS, CITY_STOPS, districtAt } from "@/game/city-layout";
 import { createActor, disposeActorMaterials, faceYaw, type Actor } from "@/game/actors";
 import { createAudio } from "@/game/audio";
 import { NPC_META } from "@/game/content";
@@ -89,8 +90,8 @@ function clampPos(place: PlaceId, x: number, z: number) {
     };
   }
   return {
-    x: THREE.MathUtils.clamp(x, -36, 36),
-    z: THREE.MathUtils.clamp(z, -7.55, 20.12),
+    x: THREE.MathUtils.clamp(x, CITY_LIMITS.minX, CITY_LIMITS.maxX),
+    z: THREE.MathUtils.clamp(z, CITY_LIMITS.minZ, CITY_LIMITS.maxZ),
   };
 }
 
@@ -148,7 +149,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
   let mode: Mode = "title";
   let speed = 0;
   let camYaw = preview.yaw;
-  let camPitch = 0.46;
+  let camPitch = 0.32;
   let sinceLook = 2;
   let attract = 0;
   let toastSerial = 1;
@@ -218,6 +219,9 @@ export function mountGame(canvas: HTMLCanvasElement) {
       goals: { ...s.goals },
       log: s.log.slice(0, 12),
       place: s.place,
+      district: s.place === "street" ? districtAt(s.x,s.z) : "",
+      playerX: s.place === "street" ? s.x : 27,
+      playerZ: s.place === "street" ? s.z : 5,
       prompt: mode === "play" ? useUi.getState().prompt : null,
       dialogue,
       notice: mode === "sleep" ? (seq?.kind === "nap" ? "A short nap" : "Lights out") : mode === "shift" ? "On the clock" : null,
@@ -247,7 +251,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
     play = state;
     mode = "play";
     camYaw = state.yaw;
-    camPitch = 0.48;
+    camPitch = 0.32;
     speed = 0;
     seq = null;
     dialogueNpc = null;
@@ -272,6 +276,25 @@ export function mountGame(canvas: HTMLCanvasElement) {
       sync(true);
     },
     interact: () => triggerInteract(),
+    travel: (id) => {
+      if (!play || play.place !== "street" || mode !== "phone") return;
+      const stop = CITY_STOPS.find((x) => x.id === id);
+      if (!stop) return;
+      const at = CITY_STOPS.find((p) => Math.hypot(p.x - play!.x,p.z - play!.z) < 5);
+      if (at?.id === stop.id) { pushToast("You are already at this stop."); return; }
+      if (play.money < 5) { pushToast("Bus fare is $5. Earn some money first."); return; }
+      play.money -= 5;
+      const notes = advance(play, 18, 0.65);
+      showNotes(notes);
+      play.x = stop.x; play.z = stop.z; play.yaw = stop.yaw;
+      camYaw = stop.yaw; camPitch = 0.32; speed = 0; busyUntil = elapsed + 0.35;
+      snapCam(play);
+      useUi.setState({ veil: 1, prompt: null });
+      window.setTimeout(() => useUi.setState({ veil: 0 }), 350);
+      mode = "play";
+      pushToast("Transit to " + stop.name + " · -$5");
+      remember();sync(true);
+    },
     openPhone: () => {
       if (mode === "play") {
         mode = "phone";
@@ -612,6 +635,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       continue: () => {},
       newLife: () => {},
       interact: () => {},
+      travel: () => {},
       openPhone: () => {},
       closePhone: () => {},
       pause: () => {},

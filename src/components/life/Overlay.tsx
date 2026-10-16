@@ -16,6 +16,7 @@ import {
   Zap,
 } from "lucide-react";
 import { GOAL_DEFS, NPC_META } from "@/game/content";
+import { CITY_STOPS, CITY_SITES, DISTRICTS, AVENUES, CROSS_STREETS } from "@/game/city-layout";
 import { gameApi, useUi } from "@/game/store";
 import { input } from "@/game/input";
 import { VirtualStick, type StickVector } from "@/game/virtual-stick";
@@ -156,6 +157,7 @@ function TopBar() {
   const money = useUi((s) => s.money);
   const needs = useUi((s) => s.needs);
   const place = useUi((s) => s.place);
+  const district = useUi((s) => s.district);
   const mode = useUi((s) => s.mode);
   const showButtons = mode === "play" || mode === "phone" || mode === "pause";
 
@@ -168,7 +170,7 @@ function TopBar() {
             <p className="truncate text-sm font-medium text-paper">
               {weekday(day)} · {clockLabel(minute)}
             </p>
-            <p className="truncate text-xs text-foam/80">{placeLabel(place)}</p>
+            <p className="truncate text-xs text-foam/80">{place === "street" ? district : placeLabel(place)}</p>
           </div>
           <p className="ml-auto font-display text-xl text-amber">${Math.floor(money)}</p>
           {showButtons ? (
@@ -473,20 +475,21 @@ function PauseCard() {
 }
 
 function PhonePanel() {
-  const [tab, setTab] = useState<"now" | "people" | "life" | "places" | "log">("now");
+  const [tab, setTab] = useState<"now" | "people" | "life" | "places" | "city" | "log">("now");
   const ui = useUi();
   const tabs = [
     ["now", "Now"],
     ["people", "People"],
     ["life", "Life"],
     ["places", "Places"],
+    ["city", "City"],
     ["log", "Log"],
   ] as const;
 
   return (
     <div className="absolute inset-0 flex items-end bg-dusk-2/40 sm:items-center sm:justify-center">
-      <section className="sheet pointer-events-auto flex w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-paper text-ink sm:rounded-3xl">
-        <header className="flex items-center gap-3 px-4 py-3">
+      <section className="pointer-events-auto flex h-[min(78dvh,680px)] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl bg-paper text-ink sm:rounded-3xl">
+        <header className="flex shrink-0 items-center gap-3 px-4 py-3">
           <Phone className="size-5 text-clay" />
           <div>
             <p className="font-display text-2xl leading-none">{ui.name}'s phone</p>
@@ -503,7 +506,7 @@ function PhonePanel() {
             <X className="size-5" />
           </button>
         </header>
-        <div className="flex gap-1 overflow-x-auto px-3 pb-2">
+        <div className="flex shrink-0 gap-1 overflow-x-auto px-3 pb-2">
           {tabs.map(([id, label]) => (
             <button
               key={id}
@@ -520,6 +523,7 @@ function PhonePanel() {
           {tab === "people" ? <PeopleTab /> : null}
           {tab === "life" ? <LifeTab /> : null}
           {tab === "places" ? <PlacesTab /> : null}
+          {tab === "city" ? <CityTab /> : null}
           {tab === "log" ? <LogTab /> : null}
         </div>
       </section>
@@ -616,7 +620,7 @@ function PlacesTab() {
   return (
     <ul className="flex flex-col gap-2">
       {rows.map((row) => {
-        const here = (row.id === "pier" || row.id === "bench") ? place === "street" : place === row.id;
+        const here = (row.id === "pier" || row.id === "bench") ? place === "street" && useUi.getState().district === "Daybreak Row" : place === row.id;
         const Icon = row.icon;
         return (
           <li key={row.id} className="flex items-start gap-3 rounded-2xl bg-paper-2 px-3 py-3">
@@ -632,6 +636,63 @@ function PlacesTab() {
         );
       })}
     </ul>
+  );
+}
+
+function CityTab() {
+  const money = useUi((s) => s.money);
+  const place = useUi((s) => s.place);
+  const district = useUi((s) => s.district);
+  const playerX = useUi((s) => s.playerX);
+  const playerZ = useUi((s) => s.playerZ);
+  const canTravel = place === "street" && money >= 5;
+  const plotX = (x: number) => 20 + (x + 39) * 1.1;
+  const plotY = (z: number) => 15 + (z + 154) * 1.15;
+  return (
+    <div className="space-y-3 pb-2">
+      <div className="rounded-2xl bg-ink p-3 text-paper">
+        <p className="font-display text-xl">Explore the city</p>
+        <p className="mt-1 text-xs text-foam/80">Walk connected streets or ride city transit for $5 and 18 minutes.</p>
+        <svg role="img" aria-label="Schematic city map and stations" viewBox="0 0 300 225" className="mt-3 w-full rounded-xl bg-[#263744]">
+          {AVENUES.map((x) => <line key={x} x1={plotX(x)} x2={plotX(x)} y1={plotY(-150)} y2={plotY(8)} stroke="#57707c" strokeWidth="5" />)}
+          {CROSS_STREETS.map((z) => <line key={z} x1={plotX(39)} x2={plotX(187)} y1={plotY(z)} y2={plotY(z)} stroke="#57707c" strokeWidth="5" />)}
+          <circle cx={plotX(playerX)} cy={plotY(playerZ)} r="8" fill="none" stroke="#ffffff" strokeWidth="2" />
+          <circle cx={plotX(playerX)} cy={plotY(playerZ)} r="3" fill="#ffffff" />
+          {CITY_STOPS.map((stop, i) => (
+            <g key={stop.id}>
+              <circle cx={plotX(stop.x)} cy={plotY(stop.z)} r="6" fill="#e7ad5e" stroke="#1c2227" strokeWidth="2" />
+              <text x={plotX(stop.x)+9} y={plotY(stop.z)+(i%2?14:-8)} fill="#fff2d8" fontSize="9">{stop.name}</text>
+            </g>
+          ))}
+        </svg>
+      </div>
+      <p className="text-sm text-dusk">
+        {place !== "street" ? "Step outside to use city transit." : `District: ${district}. ${canTravel ? "Choose a stop below." : "A transit ride requires $5."}`}
+      </p>
+      <div className="grid gap-2">
+        {DISTRICTS.map((districtDef, i) => {
+          const stop = CITY_STOPS[i];
+          return (
+            <div key={stop.id} className="flex items-center justify-between gap-3 rounded-2xl bg-paper-2 p-3">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold">{districtDef.name}</p>
+                <p className="text-xs leading-snug text-dusk">{districtDef.subtitle}</p>
+              </div>
+              <button type="button" disabled={!canTravel}
+                className="min-h-11 shrink-0 rounded-xl bg-ink px-3 text-sm text-paper disabled:opacity-40"
+                aria-label={`Ride transit to ${districtDef.name}`}
+                onClick={() => gameApi.travel(stop.id)}>Ride $5</button>
+            </div>
+          );
+        })}
+      </div>
+      <p className="pt-1 text-sm font-medium text-dusk">City activities</p>
+      <div className="grid grid-cols-2 gap-2">
+        {CITY_SITES.map((site) => <div key={site.id} className="rounded-xl bg-paper-2 p-2">
+          <p className="text-xs font-semibold">{site.name}</p><p className="text-xs text-dusk">{site.detail}</p>
+        </div>)}
+      </div>
+    </div>
   );
 }
 

@@ -67,6 +67,9 @@ export type UiState = {
   goals: Goals;
   log: string[];
   place: PlaceId;
+  district: string;
+  playerX: number;
+  playerZ: number;
   prompt: string | null;
   dialogue: DialogueView | null;
   toasts: Toast[];

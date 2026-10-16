@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { buildCity } from "@/game/city-world";
 import { apt, cafeB, marketB, officeB, pier, rooms } from "@/game/layout";
 import type { PlaceId } from "@/game/types";
 import type { SkySample } from "@/game/time";
@@ -504,6 +505,8 @@ export function buildWorld(scene: THREE.Scene): World {
     concretes.add(i * 0.7 - 0.2, 0.03, -0.35, i * 0.7 + 0.2, 0.05, 0.35);
   }
 
+  const city = buildCity(scene, colliders.street);
+
   const skyMat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     fog: false,
@@ -597,7 +600,7 @@ export function buildWorld(scene: THREE.Scene): World {
     sun.position.set(focus.x + skySample.sun.x * 28, focus.y + skySample.sun.y * 28, focus.z + skySample.sun.z * 28);
     sun.target.position.set(focus.x, 0, focus.z);
     fog.color.set(skySample.horizon);
-    fog.density = place === "street" ? 0.014 + (1 - day) * 0.008 : 0.012;
+    fog.density = place === "street" ? 0.009 + (1 - day) * 0.004 : 0.012;
     glassMat.emissiveIntensity = skySample.lamp * 1.15;
     lampMat.emissiveIntensity = 0.2 + skySample.lamp * 1.8;
     for (const light of lampLights) light.intensity = skySample.lamp * 36;
@@ -650,12 +653,14 @@ export function buildWorld(scene: THREE.Scene): World {
       bird.right.rotation.z = -flap;
     }
     fountainWater.position.y = 0.88 + Math.sin(elapsed * 2) * 0.015;
+    city.update(dt, elapsed, skySample.lamp, focus, place === "street");
   }
 
   return {
     colliders,
     update,
     dispose: () => {
+      city.dispose();
       for (const d of disposables) d.dispose();
     },
   };

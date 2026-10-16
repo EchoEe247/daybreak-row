@@ -42,3 +42,18 @@ If the game will not load after Android suspends Termux, rerun ./start-local.sh.
 - The touch QA URL uses `?touchqa` to allow deterministic QA positioning, not intended for normal play.
 - Automated checks: `npm run test:mobile-controls`, `npm run typecheck`, `npm run build`.
 - Synthetic touch validated joystick, Run, simultaneous camera-look, Use (park bench action), cancellation, portrait hitboxes. **Physical touchscreen gameplay remains for user confirmation.**
+## Connected City Expansion (October 16, 2026)
+
+The original coastal Daybreak Row neighborhood remains available. A connected mainland city now extends east and north across a 4-avenue street grid and 9 urban blocks. Preserved original apartment/cafe/market/office interiors and original version-1 save file schema.
+
+**Districts:** Daybreak Row, Old Town, Civic Quarter, Downtown, Arts & Station. All five are accessible by walking the outdoor street system.
+
+**Physical city:** 26 additional buildings with varied heights and facades, town hall/clock tower, station, gallery, library, hospital, plazas, shops, crosswalks and lane markings, sidewalk trees, street lamps, 10 moving ambient cars and up to 20 moving background pedestrians. Shared instanced geometry reduces draw calls and city decoration uses no extra shadow-casting objects.
+
+**City gameplay:** Eight real world interaction sites with proximity/use prompts, city errands, library, gallery, busking, food cart, clinic and downtown contract work. These affect the original money, time, need and activity-log systems.
+
+**Navigation:** Phone -> City opens a schematic district/transit map. Rides between five outdoor transit stops cost $5 and take 18 in-game minutes. Transits move to validated curb positions, show confirmation and save progression. Walkable routes are free. The main HUD indicates your current district; indoor HUD continues to show the interior location.
+
+**QA:** Run `npm run test:city`, `npm run typecheck`, `npm run build`. Portrait phone review at 360x740, original controls and legacy save preserved; no physical-device frame-rate claim without direct device testing.
+
+**Implementation constraints:** Browser-based Three.js, no new APK and no external assets. This is the first major connected-city pass, not a simulation of every city service, enterable building, or traffic collision.

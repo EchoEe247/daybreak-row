@@ -28,6 +28,9 @@ export const useUi = create<UiState>(() => ({
   },
   log: [],
   place: "street",
+  district: "Daybreak Row",
+  playerX: -10,
+  playerZ: 4.2,
   prompt: null,
   dialogue: null,
   toasts: [],
@@ -43,6 +46,7 @@ export type GameImpl = {
   continue: () => void;
   newLife: () => void;
   interact: () => void;
+  travel: (id: string) => void;
   openPhone: () => void;
   closePhone: () => void;
   pause: () => void;
@@ -62,6 +66,7 @@ export const gameApi: GameImpl = {
   continue: () => impl?.continue(),
   newLife: () => impl?.newLife(),
   interact: () => impl?.interact(),
+  travel: (id) => impl?.travel(id),
   openPhone: () => impl?.openPhone(),
   closePhone: () => impl?.closePhone(),
   pause: () => impl?.pause(),

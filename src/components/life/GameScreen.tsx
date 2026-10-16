@@ -24,7 +24,7 @@ export function GameScreen() {
       .catch((err: unknown) => {
         if (dead) return;
         console.error("Daybreak Row could not start:", err);
-        setError("The 3D game could not start. Use a WebGL-capable browser such as Chrome, then retry.");
+        setError("The 3D game could not start. Use a WebGL-capable browser such as Chrome, then retry." + (new URLSearchParams(window.location.search).has("cityqa") ? " QA: " + String(err) : ""));
       });
     return () => stop();
   }, []);

@@ -1,4 +1,5 @@
 import { DIALOGUE, greetingNode, NPC_META, type Fx } from "@/game/content";
+import { CITY_SITES } from "@/game/city-layout";
 import { anchors, cafeB, marketB, officeB, rooms, SPAWN } from "@/game/layout";
 import { absMinute, hourOf, weekday } from "@/game/time";
 import type { GameState, GoalId, NeedId, NpcId, PlaceId } from "@/game/types";
@@ -215,7 +216,7 @@ export function buildActions(): Action[] {
   const cafe = rooms.cafe;
   const market = rooms.market;
   const office = rooms.office;
-  return [
+  const base: Action[] = [
     {
       id: "enter-home",
       place: "street",
@@ -558,6 +559,61 @@ export function buildActions(): Action[] {
       },
     },
   ];
+  const city: Action[] = CITY_SITES.map((site) => ({
+    id: "city-" + site.id,
+    place: "street" as const,
+    x: site.x,
+    z: site.z,
+    r: 2.35,
+    label: () => site.name + " · " + site.detail,
+    run: (state: GameState) => {
+      const notes: Note[] = [];
+      const activity = site.id;
+      if (activity === "foodcart") {
+        if (state.money < 9) return done([{toast:"You'll need $9 for lunch."}]);
+        state.money -= 9;
+        state.needs.hunger = clamp(state.needs.hunger + 34);
+        notes.push({toast:"Lunch from the food cart. -$9",caption:"Steam rises from the busy sidewalk."});
+        notes.push(...advance(state,17,0.6));
+      } else if (activity === "office") {
+        if (state.needs.energy < 25) return done([{toast:"Too tired for an office contract. Rest first."}]);
+        if (absMinute(state.day,state.minute) - state.freelanceAt < 120) {
+          return done([{toast:"Your contract shift is on cooldown. Explore the city first."}]);
+        }
+        state.freelanceAt = absMinute(state.day,state.minute);
+        state.money += 46;
+        state.needs.energy = clamp(state.needs.energy - 19);
+        state.needs.hunger = clamp(state.needs.hunger - 9);
+        state.goals.earn = true;
+        notes.push({toast:"Downtown contract complete. +$46",caption:"City work pays, but the afternoon belongs to someone else."});
+        notes.push(...advance(state,125,1));
+      } else if (activity === "hospital") {
+        if (state.money < 14) return done([{toast:"The clinic visit is $14. Try the free library or plaza."}]);
+        state.money -= 14;
+        state.needs.energy = clamp(state.needs.energy + 26);
+        state.needs.hygiene = clamp(state.needs.hygiene + 12);
+        notes.push({toast:"Community clinic visit. -$14",caption:"The city takes care of its people."});
+        notes.push(...advance(state,32,0.5));
+      } else {
+        const extra = activity === "gallery" ? 24 : activity === "library" ? 17 : activity === "busking" ? 13 : activity === "station" ? 9 : 8;
+        state.needs.fun = clamp(state.needs.fun + extra);
+        state.needs.social = clamp(state.needs.social + (activity === "busking" ? 10 : 4));
+        notes.push(...advance(state,activity === "gallery" ? 35 : 20,0.5));
+        const lines:Record<string,string> = {
+          townhall:"You wander the steps of City Hall. The square has its own rhythm.",
+          library:"An hour among books makes the city feel less impossible.",
+          busking:"You catch a sidewalk performance in the music plaza.",
+          gallery:"Inside the city gallery, you find something worth remembering.",
+          station:"The platforms rumble as trains thread through the city."
+        };
+        notes.push({toast:site.name + " visited",caption:lines[activity] ?? "Another corner of the city."});
+      }
+      state.log.unshift("Visited " + site.name + ".");
+      state.log = state.log.slice(0,16);
+      return done(notes);
+    }
+  }));
+  return [...base, ...city];
 }
 
 function aptDoorX() {
