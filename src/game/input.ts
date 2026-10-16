@@ -102,6 +102,7 @@ export function attachInput(canvas: HTMLCanvasElement) {
     input.stickY = 0;
     input.lookDx = 0;
     input.lookDy = 0;
+    lookId = null;
   };
 
   let lookId: number | null = null;
@@ -110,14 +111,17 @@ export function attachInput(canvas: HTMLCanvasElement) {
 
   const onDown = (e: PointerEvent) => {
     if (e.button !== 0 && e.pointerType === "mouse") return;
+    if (lookId !== null) return; // second finger must not steal camera drag
+    e.preventDefault();
     lookId = e.pointerId;
     lastX = e.clientX;
     lastY = e.clientY;
     input.pointerLooking = true;
-    canvas.setPointerCapture(e.pointerId);
+    try { canvas.setPointerCapture(e.pointerId); } catch { /* synthetic pointer or unsupported capture */ }
   };
   const onMove = (e: PointerEvent) => {
     if (e.pointerId !== lookId) return;
+    e.preventDefault();
     input.lookDx += e.clientX - lastX;
     input.lookDy += e.clientY - lastY;
     lastX = e.clientX;
@@ -140,6 +144,7 @@ export function attachInput(canvas: HTMLCanvasElement) {
   canvas.addEventListener("pointermove", onMove);
   canvas.addEventListener("pointerup", onUp);
   canvas.addEventListener("pointercancel", onUp);
+  canvas.addEventListener("lostpointercapture", onUp);
 
   return () => {
     window.removeEventListener("keydown", onKeyDown);
@@ -150,6 +155,7 @@ export function attachInput(canvas: HTMLCanvasElement) {
     canvas.removeEventListener("pointermove", onMove);
     canvas.removeEventListener("pointerup", onUp);
     canvas.removeEventListener("pointercancel", onUp);
+    canvas.removeEventListener("lostpointercapture", onUp);
     clear();
   };
 }

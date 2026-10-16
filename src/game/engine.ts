@@ -19,7 +19,7 @@ import {
   type Note,
 } from "@/game/logic";
 import { bindGame, clearSave, loadSave, useUi, writeSave } from "@/game/store";
-import { hourOf, sampleSky } from "@/game/time";
+import { sampleSky } from "@/game/time";
 import type { GameState, Mode, NpcId, PlaceId } from "@/game/types";
 import { buildWorld, type Collider } from "@/game/world";
 
@@ -30,7 +30,12 @@ declare global {
   interface Window {
     __controlsTest?: {
       getYaw: () => number;
+      getCameraYaw: () => number;
+      getFun: () => number;
+      setPositionForQA: ((x: number, z: number) => void) | undefined;
       getSpeed: () => number;
+      getPosition: () => { x: number; z: number };
+      getTouchInput: () => { x: number; y: number; run: boolean; looking: boolean };
       setKeys: (codes: string[]) => void;
       setSteer?: (v: number) => void;
     };
@@ -108,14 +113,14 @@ function camClip(px: number, pz: number, tx: number, tz: number, boxes: Collider
 }
 
 export function mountGame(canvas: HTMLCanvasElement) {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" });
+  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, powerPreference: "high-performance" });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
-  const mapSize = coarse ? 1024 : 2048;
+  const mapSize = coarse ? 512 : 2048;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 400);
@@ -355,7 +360,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
   function resize() {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
-    const dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1.35 : 1.75);
+    const dpr = Math.min(window.devicePixelRatio || 1, coarse ? 1 : 1.75);
     renderer.setPixelRatio(dpr);
     renderer.setSize(w, h, false);
     camera.aspect = w / Math.max(1, h);
@@ -367,7 +372,13 @@ export function mountGame(canvas: HTMLCanvasElement) {
 
   window.__controlsTest = {
     getYaw: () => sim().yaw,
+    getCameraYaw: () => camYaw,
+    getFun: () => sim().needs.fun,
+    // Deterministic QA setup only; never enabled in the regular gameplay URL.
+    setPositionForQA: new URLSearchParams(window.location.search).has("touchqa") ? (x, z) => { if (play) { play.x = x; play.z = z; } } : undefined,
     getSpeed: () => speed,
+    getPosition: () => ({ x: sim().x, z: sim().z }),
+    getTouchInput: () => ({ x: input.stickX, y: input.stickY, run: input.runHeld, looking: input.pointerLooking }),
     setKeys: (codes) => {
       input.keys.clear();
       for (const code of codes) input.keys.add(code);

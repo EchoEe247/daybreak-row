@@ -1,4 +1,4 @@
-import { useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import {
   BookOpen,
   Briefcase,
@@ -18,6 +18,7 @@ import {
 import { GOAL_DEFS, NPC_META } from "@/game/content";
 import { gameApi, useUi } from "@/game/store";
 import { input } from "@/game/input";
+import { VirtualStick, type StickVector } from "@/game/virtual-stick";
 import { clockLabel, placeLabel, weekday } from "@/game/time";
 import type { NeedId, NpcId } from "@/game/types";
 
@@ -240,36 +241,26 @@ function PlayChrome() {
 
 function TouchControls({ prompt }: { prompt: boolean }) {
   return (
-    <div className="safe-bottom pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between px-4 pb-3">
+    <div className="safe-bottom pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 px-4 pb-3 select-none">
       <Joystick />
-      <div className="pointer-events-auto flex items-end gap-3">
-        <button
-          type="button"
-          aria-label="Run"
-          className="grid size-14 place-items-center rounded-full border border-white/15 bg-dusk-2/80 text-xs font-medium text-paper"
-          onPointerDown={(e) => {
-            e.stopPropagation();
-            e.currentTarget.setPointerCapture(e.pointerId);
-            input.runHeld = true;
-          }}
-          onPointerUp={() => {
-            input.runHeld = false;
-          }}
-          onPointerCancel={() => {
-            input.runHeld = false;
-          }}
-        >
-          Run
-        </button>
+      <div className="pointer-events-auto flex shrink-0 items-end gap-3">
+        <RunButton />
         <button
           type="button"
           aria-label={prompt ? "Use" : "Interact"}
-          className={`grid size-16 place-items-center rounded-full text-sm font-semibold ${
+          data-game-control="use"
+          className={`grid size-16 shrink-0 touch-none select-none place-items-center rounded-full text-sm font-semibold ${
             prompt ? "bg-amber text-ink" : "bg-paper/90 text-ink"
           }`}
           onPointerDown={(e) => {
+            // Activate immediately, even if the other thumb is holding the joystick.
             e.stopPropagation();
+            e.preventDefault();
             gameApi.interact();
+          }}
+          onClick={(e) => {
+            // Native keyboard and assistive-tech clicks have detail=0.
+            if (e.detail === 0) gameApi.interact();
           }}
         >
           Use
@@ -279,69 +270,142 @@ function TouchControls({ prompt }: { prompt: boolean }) {
   );
 }
 
-function Joystick() {
-  const origin = useRef({ id: -1, x: 0, y: 0 });
+function RunButton() {
+  const heldId = useRef<number | null>(null);
+  useEffect(() => {
+    const reset = () => {
+      heldId.current = null;
+      input.runHeld = false;
+    };
+    const onHidden = () => { if (document.hidden) reset(); };
+    const releasePointer = (e: PointerEvent) => { if (e.pointerId === heldId.current) reset(); };
+    window.addEventListener("blur", reset);
+    window.addEventListener("pointerup", releasePointer);
+    window.addEventListener("pointercancel", releasePointer);
+    document.addEventListener("visibilitychange", onHidden);
+    return () => {
+      window.removeEventListener("blur", reset);
+      window.removeEventListener("pointerup", releasePointer);
+      window.removeEventListener("pointercancel", releasePointer);
+      document.removeEventListener("visibilitychange", onHidden);
+      reset();
+    };
+  }, []);
+  const release = (id: number) => {
+    if (heldId.current !== id) return;
+    heldId.current = null;
+    input.runHeld = false;
+  };
+  return (
+    <button
+      type="button"
+      aria-label="Run"
+      data-game-control="run"
+      className="grid size-14 shrink-0 touch-none select-none place-items-center rounded-full border border-white/15 bg-dusk-2/80 text-xs font-medium text-paper"
+      onPointerDown={(e) => {
+        if (heldId.current !== null) return;
+        e.stopPropagation();
+        e.preventDefault();
+        heldId.current = e.pointerId;
+        input.runHeld = true;
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* window fallback handles release */ }
+      }}
+      onPointerUp={(e) => release(e.pointerId)}
+      onPointerCancel={(e) => release(e.pointerId)}
+      onLostPointerCapture={(e) => release(e.pointerId)}
+    >
+      Run
+    </button>
+  );
+}
 
-  const apply = (e: ReactPointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const dx = e.clientX - origin.current.x;
-    const dy = e.clientY - origin.current.y;
-    const max = rect.width * 0.38;
-    const mag = Math.hypot(dx, dy) || 1;
-    const scale = mag > max ? max / mag : 1;
-    const clampedX = dx * scale;
-    const clampedY = dy * scale;
-    const knob = e.currentTarget.querySelector("[data-knob]");
-    if (knob instanceof HTMLElement) knob.style.transform = `translate(${clampedX}px, ${clampedY}px)`;
-    const vx = clampedX / max;
-    const vy = clampedY / max;
-    const dead = 0.18;
-    const mags = Math.hypot(vx, vy);
-    if (mags < dead) {
+function Joystick() {
+  const stick = useRef(new VirtualStick());
+  const root = useRef<HTMLDivElement>(null);
+
+  const apply = (v: StickVector) => {
+    input.stickX = v.x;
+    input.stickY = v.y;
+    const knob = root.current?.querySelector("[data-knob]");
+    if (knob instanceof HTMLElement) {
+      knob.style.transform = `translate3d(${v.thumbX}px, ${v.thumbY}px, 0)`;
+    }
+  };
+
+  useEffect(() => {
+    const releaseAll = () => {
+      stick.current.reset();
       input.stickX = 0;
       input.stickY = 0;
-    } else {
-      const k = (mags - dead) / (1 - dead) / mags;
-      input.stickX = Math.max(-1, Math.min(1, vx * k));
-      input.stickY = Math.max(-1, Math.min(1, -vy * k));
-    }
+      const knob = root.current?.querySelector("[data-knob]");
+      if (knob instanceof HTMLElement) knob.style.transform = "translate3d(0px, 0px, 0)";
+    };
+    const onHidden = () => { if (document.hidden) releaseAll(); };
+    const onWindowMove = (e: PointerEvent) => {
+      const v = stick.current.move(e.pointerId, e.clientX, e.clientY);
+      if (!v) return;
+      input.stickX = v.x;
+      input.stickY = v.y;
+      const knob = root.current?.querySelector("[data-knob]");
+      if (knob instanceof HTMLElement) knob.style.transform = `translate3d(${v.thumbX}px, ${v.thumbY}px, 0)`;
+    };
+    const onWindowUp = (e: PointerEvent) => {
+      if (stick.current.end(e.pointerId)) releaseAll();
+    };
+    window.addEventListener("blur", releaseAll);
+    window.addEventListener("pointermove", onWindowMove);
+    window.addEventListener("pointerup", onWindowUp);
+    window.addEventListener("pointercancel", onWindowUp);
+    document.addEventListener("visibilitychange", onHidden);
+    return () => {
+      window.removeEventListener("blur", releaseAll);
+      window.removeEventListener("pointermove", onWindowMove);
+      window.removeEventListener("pointerup", onWindowUp);
+      window.removeEventListener("pointercancel", onWindowUp);
+      document.removeEventListener("visibilitychange", onHidden);
+      releaseAll();
+    };
+  }, []);
+
+  const release = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const vector = stick.current.end(e.pointerId);
+    if (vector) apply(vector);
   };
 
   return (
     <div
-      className="pointer-events-auto relative grid size-32 place-items-center rounded-full border border-white/15 bg-dusk-2/55"
+      ref={root}
+      role="application"
+      aria-label="Movement joystick"
+      data-game-control="joystick"
+      className="pointer-events-auto relative grid size-32 shrink-0 touch-none select-none place-items-center rounded-full border border-white/15 bg-dusk-2/55"
+      onContextMenu={(e) => e.preventDefault()}
       onPointerDown={(e) => {
+        e.preventDefault();
         e.stopPropagation();
-        e.currentTarget.setPointerCapture(e.pointerId);
+        if (stick.current.pointerId !== null) return;
         const rect = e.currentTarget.getBoundingClientRect();
-        origin.current.id = e.pointerId;
-        origin.current.x = rect.left + rect.width / 2;
-        origin.current.y = rect.top + rect.height / 2;
-        apply(e);
+        const v = stick.current.begin(
+          e.pointerId, rect.left + rect.width / 2, rect.top + rect.height / 2,
+          rect.width * 0.39, e.clientX, e.clientY,
+        );
+        if (v) apply(v);
+        try { e.currentTarget.setPointerCapture(e.pointerId); } catch { /* window fallback continues dragging */ }
       }}
       onPointerMove={(e) => {
-        if (origin.current.id !== e.pointerId) return;
-        apply(e);
+        const v = stick.current.move(e.pointerId, e.clientX, e.clientY);
+        if (v) {
+          e.preventDefault();
+          apply(v);
+        }
       }}
-      onPointerUp={(e) => {
-        origin.current.id = -1;
-        releaseStick(e.currentTarget);
-      }}
-      onPointerCancel={(e) => {
-        origin.current.id = -1;
-        releaseStick(e.currentTarget);
-      }}
+      onPointerUp={release}
+      onPointerCancel={release}
+      onLostPointerCapture={release}
     >
-      <div data-knob className="size-14 rounded-full bg-paper/90 shadow-md" />
+      <div data-knob className="pointer-events-none size-14 rounded-full bg-paper/90 shadow-md will-change-transform" />
     </div>
   );
-}
-
-function releaseStick(node: HTMLDivElement) {
-  const knob = node.querySelector("[data-knob]");
-  if (knob instanceof HTMLElement) knob.style.transform = "translate(0px, 0px)";
-  input.stickX = 0;
-  input.stickY = 0;
 }
 
 function Toasts() {

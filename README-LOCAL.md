@@ -31,3 +31,14 @@ The game runs on the phone. Local testing in the dedicated ChatGPT browser uses 
 - Dedicated browser uses Mesa llvmpipe; scene frame capture could not be certified due to capture-runtime failure.
 
 If the game will not load after Android suspends Termux, rerun ./start-local.sh. Keep Termux running while playing.
+## Mobile controls v2
+- Drag the lower-left joystick: up = walk forward, down = back, left/right = strafe.
+- Hold **Run** with a second finger while moving to sprint.
+- Drag the open world with a free finger to rotate the camera without cancelling movement.
+- Tap **Use** to activate the nearby action shown above the controls.
+- Controls have `touch-action: none` to avoid Android browser scroll/swipe gesture interception.
+- Lost pointer capture, pointer cancellation, tab backgrounding, window blur, and unmount all release movement/Run safely.
+- Android/mobile graphics use no MSAA, a lower shadow map, and a 1x internal pixel ratio to prioritize responsiveness.
+- The touch QA URL uses `?touchqa` to allow deterministic QA positioning, not intended for normal play.
+- Automated checks: `npm run test:mobile-controls`, `npm run typecheck`, `npm run build`.
+- Synthetic touch validated joystick, Run, simultaneous camera-look, Use (park bench action), cancellation, portrait hitboxes. **Physical touchscreen gameplay remains for user confirmation.**
