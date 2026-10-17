@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { installStreetTrees, type StreetTree } from "./realistic-vegetation";
 import { AVENUES, CROSS_STREETS, CITY_STOPS, CITY_SITES } from "./city-layout";
 import type { Collider } from "./world";
 import { loadRiggedHuman, type LoadedHuman, type HumanKind } from "./human-assets";
@@ -178,23 +179,24 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
       treePts.push([x+(z%2)*0.6,z]);
     }
   }
-  for(const [x,z] of treePts) {
+  const isMobile = window.matchMedia("(pointer: coarse)").matches || new URLSearchParams(window.location.search).has("mobile-qa");
+  const plantedPoints = isMobile ? treePts.filter((_, i) => i % 4 === 0) : treePts;
+  const planted: StreetTree[] = [];
+  for(const [x,z] of plantedPoints) {
     trunks.add(x,1.2,z,0.3,2.4,0.3);
     leaves.add(x,2.8,z,2.5,2.5,2.5);
     leaves.add(x+0.4,3.5,z,2.0,1.75,2);
     streetColliders.push({minX:x-0.22,maxX:x+0.22,minZ:z-0.22,maxZ:z+0.22});
+    planted.push({ x, z, height: 5.5 + (planted.length % 5) * 0.28, species: (planted.length % 3) as 0 | 1 | 2 });
   }
+  const realisticCityTrees = installStreetTrees(scene, planted, () => {
+    trunks.mesh.visible = false;
+    leaves.mesh.visible = false;
+  });
 
   // Street lights have emissive fixtures but no per-lamp shadow/light cost.
-  const bulbMat=new THREE.MeshBasicMaterial({color:0xffe9b3});
-  owned.push(bulbMat);
-  const lampBulbs=batch(bulbMat,90);
-  for(const x of [52,92,132,172]) for(const z of [-14,-60,-104,-145]){
-    metalBits.add(x,2.5,z,0.13,5,0.13);
-    metalBits.add(x+0.65,5.0,z,1.4,0.14,0.14);
-    lampBulbs.add(x+1.3,4.93,z,0.48,0.2,0.44);
-  }
-  all.push(lampBulbs);
+  // Real street lamps are provided by the CC0 asset in cityProps below.
+  // With permanent daytime lighting there is no need for glowing cube bulbs.
 
   // Distinctive landmark labels. Large readable names use a small number of sign meshes.
   function sign(label:string,x:number,y:number,z:number,width=7) {
@@ -235,6 +237,18 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     placeRealisticProp(scene,"metal_trash_can",95,-42,{height:1.03}),
     placeRealisticProp(scene,"metal_trash_can",138,-80,{height:1.03}),
     placeRealisticProp(scene,"metal_trash_can",179,-121,{height:1.03}),
+    placeRealisticProp(scene,"bus-shelter",141.5,-75,{height:2.48,yaw:Math.PI}),
+    placeRealisticProp(scene,"bus-shelter",182,-114,{height:2.48,yaw:Math.PI / 2}),
+    ...(isMobile ? [] : [placeRealisticProp(scene,"bus-shelter",101.5,-32,{height:2.48,yaw:0})]),
+    placeRealisticProp(scene,"information-board",140.5,-81,{height:2.05}),
+    placeRealisticProp(scene,"wayfinding-totem",177,-119,{height:2.22}),
+    placeRealisticProp(scene,"recycling-station",106,-34,{height:0.96}),
+    placeRealisticProp(scene,"recycling-station",135,-80,{height:0.96}),
+    ...[52,92,132,172].flatMap((x, i) =>
+      [-14,-60,-104,-145].filter((_, j) => (i*4+j)%(isMobile?8:4)===0).map(z =>
+        placeRealisticProp(scene,"street_lamp_01",x,z,{height:5.15})
+      )
+    ),
   ];
 
   // CC0 vehicle meshes replace the placeholder boxes after loading, without changing paths/collision.
@@ -292,6 +306,7 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   return {
     update(dt:number, elapsed:number, night:number, focus:THREE.Vector3, outdoor:boolean) {
       glass.emissiveIntensity=night*0.85;
+      realisticCityTrees.setVisible(outdoor);
       // Hide animated city life while the player is indoors; reduce unnecessary instance churn.
       const legacyCars = outdoor && !realTraffic;
       for(const m of [...trafficBody,cabinTraffic])m.visible=legacyCars;
@@ -340,6 +355,7 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     },
     dispose() {
       releasedTraffic=true;
+      realisticCityTrees.dispose();
       window.clearTimeout(trafficTimer);
       realTraffic?.dispose();
       pbrDisposers.forEach(dispose=>dispose());

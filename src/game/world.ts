@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildCity } from "@/game/city-world";
+import { installStreetTrees, type StreetTree } from "@/game/realistic-vegetation";
 import { applyRealisticSurface, placeRealisticProp, replaceVisualVehicle } from "@/game/environment-assets";
 import { loadRiggedHuman, type LoadedHuman } from "@/game/human-assets";
 import { apt, cafeB, marketB, officeB, pier, rooms } from "@/game/layout";
@@ -292,20 +293,12 @@ export function buildWorld(scene: THREE.Scene): World {
   sign("CHO'S MARKET", marketB.door, 3.05, marketB.zFront - 0.2, Math.PI);
   sign("NORTHLINE", officeB.door, 3.3, officeB.zFront + 0.16);
 
-  const lampLights: THREE.PointLight[] = [];
-  const lampPositions = [-28, -16, -6, 6, 18, 30];
-  for (const x of lampPositions) {
-    for (const z of [-5.6, 5.7]) {
-      metals.addCenter(x, 1.7, z, 0.07, 3.4, 0.07);
-      glasses.addCenter(x, 3.5, z, 0.28, 0.16, 0.28);
-      const light = new THREE.PointLight(0xffb15a, 0, 11, 2);
-      light.position.set(x, 3.35, z);
-      scene.add(light);
-      lampLights.push(light);
-    }
-  }
+  // Fixed daytime city: use only a few high-detail CC0 street lamp visuals.
+  // Omit the old geometric poles, blocky heads and inactive nighttime point lights.
 
+  const harborTreePositions: StreetTree[] = [];
   function tree(x: number, z: number, s = 1, alt = false) {
+    harborTreePositions.push({ x, z, height: 4.1 * s, species: (harborTreePositions.length % 3) as 0 | 1 | 2 });
     trunks.addCenter(x, 1.1 * s, z, 0.16 * s, 2.2 * s, 0.16 * s);
     const bucketLeaves = alt ? leaves2 : leaves;
     bucketLeaves.addCenter(x, 2.5 * s, z, 0.95 * s, 0.8 * s, 0.95 * s);
@@ -320,6 +313,12 @@ export function buildWorld(scene: THREE.Scene): World {
   tree(-34, -5.4, 0.85);
   tree(16.5, -5.5, 0.8, true);
   tree(38, 2, 1.4);
+  const realisticHarborTrees = installStreetTrees(scene, harborTreePositions, () => {
+    // Original simple shapes stay as visible fallbacks until all CC0 models load.
+    trunks.mesh.visible = false;
+    leaves.mesh.visible = false;
+    leaves2.mesh.visible = false;
+  });
 
   const grassBlades = bucket(new THREE.PlaneGeometry(1, 1), leaf, 180, false);
   for (let i = 0; i < 70; i++) {
@@ -359,8 +358,8 @@ export function buildWorld(scene: THREE.Scene): World {
     placeRealisticProp(scene,"Sofa_01",2.65,727.0,{height:0.88}),
   ];
   // Preserve the original lamp-light positions while replacing their simple meshes.
-  for(const x of [-28,-6,18]) for(const z of [-5.6,5.7]) {
-    premiumPropDisposers.push(placeRealisticProp(scene,"street_lamp_01",x,z,{height:3.55}));
+  for(const x of [-6,18]) {
+    premiumPropDisposers.push(placeRealisticProp(scene,"street_lamp_01",x,5.7,{height:3.55}));
   }
 
   const parkedA = makeCar(0xc4553a);
@@ -618,6 +617,7 @@ export function buildWorld(scene: THREE.Scene): World {
     (skyMat.uniforms.uHorizon.value as THREE.Color).set(skySample.horizon);
     (skyMat.uniforms.uSun.value as THREE.Vector3).set(skySample.sun.x, skySample.sun.y, skySample.sun.z);
     skyMat.uniforms.uStars.value = skySample.stars;
+    realisticHarborTrees.setVisible(place === "street");
     // Hide only the active interior ceiling for a clear room-aware, elevated camera.
     for (const entry of roomCeilings) entry.mesh.visible = entry.id !== place;
     const elev = skySample.elev;
@@ -633,7 +633,6 @@ export function buildWorld(scene: THREE.Scene): World {
     fog.density = place === "street" ? 0.009 + (1 - day) * 0.004 : 0.012;
     glassMat.emissiveIntensity = skySample.lamp * 1.15;
     lampMat.emissiveIntensity = 0.2 + skySample.lamp * 1.8;
-    for (const light of lampLights) light.intensity = skySample.lamp * 36;
     glowMat.color.set(skySample.horizon);
 
     const pos = waterGeo.attributes.position;
@@ -690,6 +689,7 @@ export function buildWorld(scene: THREE.Scene): World {
     colliders,
     update,
     dispose: () => {
+      realisticHarborTrees.dispose();
       premiumPropDisposers.forEach(dispose=>dispose());
       endPBR.forEach(dispose=>dispose());
       paintedSedan.dispose();

@@ -8,7 +8,8 @@ export type EnvironmentSurface =
 
 export type EnvironmentProp =
   | "painted_wooden_bench" | "sofa_02" | "Sofa_01" | "WoodenTable_01"
-  | "metal_trash_can" | "street_lamp_01" | "painted_wooden_nightstand";
+  | "metal_trash_can" | "street_lamp_01" | "painted_wooden_nightstand"
+  | "bus-shelter" | "information-board" | "recycling-station" | "wayfinding-totem";
 export type VehicleType = "realistic-sedan" | "red-sedan";
 
 // QA overrides isolate any heavy asset category without changing player/save data.
@@ -105,7 +106,9 @@ function batchStaticCar(root: THREE.Group): THREE.Group {
     const combined=mergeGeometries(geos,false);
     if(!combined){return root;}
     const mesh=new THREE.Mesh(combined,material);
-    mesh.frustumCulled=false;
+    // Cull individual CC0 props/cars when outside the camera view. All geometry
+    // is pretransformed into this mesh, so its static bounds are valid.
+    mesh.frustumCulled=true;
     batched.add(mesh);
     geos.forEach(geo=>geo.dispose());
   }
@@ -113,15 +116,16 @@ function batchStaticCar(root: THREE.Group): THREE.Group {
   return batched;
 }
 
+const glbProps = new Set<EnvironmentProp>(["bus-shelter","information-board","recycling-station","wayfinding-totem"]);
 function modelUrl(kind: EnvironmentProp | VehicleType) {
-  return kind === "realistic-sedan" || kind === "red-sedan"
+  return kind === "realistic-sedan" || kind === "red-sedan" || glbProps.has(kind as EnvironmentProp)
     ? `/environment/models/${kind}.glb`
     : `/environment/models/${kind}/${kind}.gltf`;
 }
 async function template(kind: EnvironmentProp | VehicleType) {
   let task = modelCache.get(kind);
   if(!task){
-    task = modelLoader.loadAsync(modelUrl(kind)).then(g=>kind === "realistic-sedan" || kind === "red-sedan" ? batchStaticCar(g.scene) : g.scene).catch(err=>{
+    task = modelLoader.loadAsync(modelUrl(kind)).then(g=>kind === "realistic-sedan" || kind === "red-sedan" || glbProps.has(kind as EnvironmentProp) ? batchStaticCar(g.scene) : g.scene).catch(err=>{
       modelCache.delete(kind);
       throw err;
     });

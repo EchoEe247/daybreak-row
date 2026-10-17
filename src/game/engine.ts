@@ -42,6 +42,7 @@ declare global {
       getPosition: () => { x: number; z: number };
       getHumanQA: () => Record<string, { status: string; motion: string; visible: boolean }>;
       getRenderQA: () => { draws: number; triangles: number; textures: number; geometries: number; sceneNodes: number };
+      getSceneCostsQA: () => Array<{ name: string; tris: number; instances: number }>;
       getPlace: () => PlaceId;
       getCameraPosition: () => { x: number; y: number; z: number };
       getTransition: () => { label: string | null; veil: number };
@@ -471,6 +472,20 @@ export function mountGame(canvas: HTMLCanvasElement) {
       return stats;
     },
     getRenderQA: () => ({ draws: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, sceneNodes: scene.children.length }),
+    getSceneCostsQA: () => {
+      const items: Array<{ name: string; tris: number; instances: number }> = [];
+      if (!new URLSearchParams(window.location.search).has("touchqa")) return items;
+      scene.traverse(node => {
+        if (!(node as THREE.Mesh).isMesh || !node.visible) return;
+        const mesh = node as THREE.Mesh;
+        const geometry = mesh.geometry;
+        if (!geometry) return;
+        const tris = (geometry.index ? geometry.index.count : geometry.getAttribute("position")?.count ?? 0) / 3;
+        const instances = (mesh as THREE.InstancedMesh).isInstancedMesh ? (mesh as THREE.InstancedMesh).count : 1;
+        items.push({name: mesh.name || mesh.parent?.name || "(unnamed)", tris: Math.round(tris * instances), instances});
+      });
+      return items.sort((a,b)=>b.tris-a.tris).slice(0,32);
+    },
     getPlace: () => sim().place,
     getCameraPosition: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z }),
     getTransition: () => ({ label: useUi.getState().transitionLabel, veil: useUi.getState().veil }),

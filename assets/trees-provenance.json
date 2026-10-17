@@ -1,0 +1,96 @@
+{
+  "assets": [
+    {
+      "bytes": 338092,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/oak-light.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:58:14.977100Z",
+      "sha256": "5aab32df17a79e9d6dd0562d0097a569fdf4e591e14f7ba6d5bd243628042222",
+      "source_url": "https://www.innerscene.com/api/library/oak-street-tree-light-canopy-a469b6df/download",
+      "title": "oak street tree light canopy",
+      "unpacked": false
+    },
+    {
+      "bytes": 338352,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/maple-light.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:58:17.723978Z",
+      "sha256": "0f2585ae44f4d8dd83363b6cd793afec7664b195796e1672d9c00c838014991c",
+      "source_url": "https://www.innerscene.com/api/library/maple-street-tree-light-canopy-867d03d7/download",
+      "title": "maple street tree light canopy",
+      "unpacked": false
+    },
+    {
+      "bytes": 337092,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/linden-light.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:58:19.914608Z",
+      "sha256": "90d3c6677f72a54ce9a246ffe5e538ded9613176053a107d9dbd42118a656c74",
+      "source_url": "https://www.innerscene.com/api/library/linden-street-tree-light-canopy-1bdbd90f/download",
+      "title": "linden street tree light canopy",
+      "unpacked": false
+    },
+    {
+      "bytes": 634120,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/bus-shelter.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:59:24.458798Z",
+      "sha256": "1a933ff192000bd39d548503d15078b2153a02bd988f6ccedea6d0d59f8a0f4d",
+      "source_url": "https://www.innerscene.com/api/library/bus-shelter-public-transport-furniture-e943b94a/download",
+      "title": "bus-shelter",
+      "unpacked": false
+    },
+    {
+      "bytes": 137280,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/information-board.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:59:26.498691Z",
+      "sha256": "01c5ae871472a83655f1eeda0b714701e126095b3e14baa4220e52f4f15e6a85",
+      "source_url": "https://www.innerscene.com/api/library/information-board-public-transport-furniture-1f514f27/download",
+      "title": "information-board",
+      "unpacked": false
+    },
+    {
+      "bytes": 165436,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/recycling-station.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:59:28.545930Z",
+      "sha256": "ea9196f7444976992676777350a6010ec6981610b1579ffe186df62c11b07368",
+      "source_url": "https://www.innerscene.com/api/library/litter-and-recycling-station-public-transport-furniture-e0500679/download",
+      "title": "recycling-station",
+      "unpacked": false
+    },
+    {
+      "bytes": 111244,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/wayfinding-totem.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T01:59:30.331322Z",
+      "sha256": "eee8b19b65f99ca3f8b6edc053814f5837712c9f4e733e817fdf752a5dc0d375",
+      "source_url": "https://www.innerscene.com/api/library/wayfinding-totem-public-transport-furniture-b33f7dd7/download",
+      "title": "wayfinding-totem",
+      "unpacked": false
+    }
+  ],
+  "version": 1
+}
