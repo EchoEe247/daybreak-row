@@ -39,6 +39,7 @@ declare global {
       setSceneForQA: ((place: PlaceId, x: number, z: number) => void) | undefined;
       getSpeed: () => number;
       getPosition: () => { x: number; z: number };
+      getHumanQA: () => Record<string, { status: string; motion: string; visible: boolean }>;
       getPlace: () => PlaceId;
       getCameraPosition: () => { x: number; y: number; z: number };
       getTransition: () => { label: string | null; veil: number };
@@ -455,6 +456,13 @@ export function mountGame(canvas: HTMLCanvasElement) {
     } : undefined,
     getSpeed: () => speed,
     getPosition: () => ({ x: sim().x, z: sim().z }),
+    getHumanQA: () => {
+      const stats: Record<string, { status: string; motion: string; visible: boolean }> = {};
+      for (const [key, actor] of [["player", player] as const, ...NPCS.map(id => [id, npcs[id]] as const)]) {
+        stats[key] = { status: actor.humanStatus(), motion: actor.humanAnimation(), visible: actor.group.visible };
+      }
+      return stats;
+    },
     getPlace: () => sim().place,
     getCameraPosition: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z }),
     getTransition: () => ({ label: useUi.getState().transitionLabel, veil: useUi.getState().veil }),

@@ -1,13 +1,13 @@
 import * as THREE from "three";
 import { AVENUES, CROSS_STREETS, CITY_STOPS, CITY_SITES } from "./city-layout";
 import type { Collider } from "./world";
+import { loadRiggedHuman, type LoadedHuman, type HumanKind } from "./human-assets";
 
 /** Lightweight, fully connected outdoor city; one batched draw per material. */
 export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   const owned: Array<{dispose: () => void}> = [];
   const boxGeo = new THREE.BoxGeometry(1, 1, 1);
-  const ballGeo = new THREE.IcosahedronGeometry(1, 1);
-  owned.push(boxGeo, ballGeo);
+  owned.push(boxGeo);
   type Batch = { add: (x:number,y:number,z:number,sx:number,sy:number,sz:number) => void; finish:()=>void; mesh: THREE.InstancedMesh };
   function batch(material: THREE.Material, limit: number): Batch {
     const mesh = new THREE.InstancedMesh(boxGeo, material, limit);
@@ -40,10 +40,8 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   const park=new THREE.MeshLambertMaterial({color:0x66885d});
   const roofMat=new THREE.MeshLambertMaterial({color:0x373f4b});
   const roadMat=new THREE.MeshLambertMaterial({color:0x4b5059});
-  const headMat=new THREE.MeshLambertMaterial({color:0xc99676});
-  const coatMat=new THREE.MeshLambertMaterial({color:0x536675});
   const trafficColors=[0xc16d53,0xe1d9c4,0x4e8791,0x354156,0xc09b58].map(color=>new THREE.MeshLambertMaterial({color}));
-  const mats=[...walls,dark,glass,concrete,lanePaint,metal,leaf,wood,park,roofMat,roadMat,headMat,coatMat,...trafficColors];
+  const mats=[...walls,dark,glass,concrete,lanePaint,metal,leaf,wood,park,roofMat,roadMat,...trafficColors];
   owned.push(...mats);
   const mass=walls.map(mat=>batch(mat,130));
   const windows=batch(glass,8500);
@@ -231,9 +229,26 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     phase:(i*0.137)%1,
     speed:2.9+(i%3)*1.1,
   }));
-  const citizenBody=new THREE.InstancedMesh(boxGeo,coatMat,20);
-  const citizenHead=new THREE.InstancedMesh(ballGeo,headMat,20);
-  for(const mesh of [citizenBody,citizenHead]){ mesh.frustumCulled=false;scene.add(mesh); }
+  // Eight fully-rigged pedestrians share three distinct source models.
+  // Keep this population deliberately small on mobile: never animate out-of-range walkers.
+  type Pedestrian = { group: THREE.Group; rig: LoadedHuman };
+  const cityPedestrians: Array<Pedestrian | null> = Array.from({length:8},()=>null);
+  let released = false;
+  const pedestrianKinds: HumanKind[] = ["pedestrian-a","pedestrian-b","pedestrian-c"];
+  cityPedestrians.forEach((_,i)=>{
+    const kind=pedestrianKinds[i%pedestrianKinds.length];
+    void loadRiggedHuman(kind).then(rig=>{
+      if(released){rig.mixer.stopAllAction();return;}
+      rig.actions.idle.stop();
+      rig.actions.walk.reset().play();
+      rig.actions.walk.setEffectiveTimeScale(0.75+(i%3)*0.15);
+      const group=new THREE.Group();
+      group.add(rig.root);
+      group.visible=false;
+      scene.add(group);
+      cityPedestrians[i]={group,rig};
+    }).catch(error=>console.warn("Ambient human unavailable:",kind,error));
+  });
   const dummy=new THREE.Object3D();
   function setInstance(mesh:THREE.InstancedMesh,i:number,x:number,y:number,z:number,sx:number,sy:number,sz:number,rot=0){
     dummy.position.set(x,y,z);dummy.rotation.set(0,rot,0);dummy.scale.set(sx,sy,sz);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
@@ -244,8 +259,8 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     update(dt:number, elapsed:number, night:number, focus:THREE.Vector3, outdoor:boolean) {
       glass.emissiveIntensity=night*0.85;
       // Hide animated city life while the player is indoors; reduce unnecessary instance churn.
-      for(const m of [...trafficBody,cabinTraffic,citizenBody,citizenHead])m.visible=outdoor;
-      if(!outdoor)return;
+      for(const m of [...trafficBody,cabinTraffic])m.visible=outdoor;
+      if(!outdoor) { for (const walker of cityPedestrians) if(walker) walker.group.visible=false; return; }
       const counters=trafficColors.map(()=>0);
       let cab=0;
       for(let i=0;i<traffic.length;i++){
@@ -264,23 +279,26 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
       }
       trafficBody.forEach((m,i)=>{m.count=counters[i];m.instanceMatrix.needsUpdate=true;});
       cabinTraffic.count=cab;cabinTraffic.instanceMatrix.needsUpdate=true;
-      let count=0;
-      for(let i=0;i<20;i++){
-        const col=Math.floor(i/4)%4;
-        const xx=AVENUES[col]+(i%2===0?-7:7);
-        const zz=-133+((i*18+elapsed*(i%3+1)*0.75)%129);
-        if(Math.hypot(xx-focus.x,zz-focus.z)>75)continue;
-        setInstance(citizenBody,count,xx,0.97,zz,0.38,1.16,0.28);
-        setInstance(citizenHead,count,xx,1.72,zz,0.2,0.2,0.2);
-        count++;
+      for (let i=0;i<cityPedestrians.length;i++) {
+        const walker=cityPedestrians[i];
+        if(!walker)continue;
+        const col=Math.floor(i/2)%4;
+        const x=AVENUES[col]+(i%2===0 ? -7:7);
+        const z=-133+((i*31+elapsed*(0.65+(i%3)*0.22))%129);
+        const near=Math.hypot(x-focus.x,z-focus.z)<55;
+        walker.group.visible=near;
+        if(!near)continue;
+        walker.group.position.set(x,0,z);
+        walker.group.rotation.y=i%2 ? 0 : Math.PI;
+        walker.rig.mixer.update(dt);
       }
-      citizenBody.count=count;citizenHead.count=count;
-      citizenBody.instanceMatrix.needsUpdate=true;citizenHead.instanceMatrix.needsUpdate=true;
       void dt;
     },
     dispose() {
       for(const b of all)b.mesh.dispose();
-      for(const m of [...trafficBody,cabinTraffic,citizenBody,citizenHead])m.dispose();
+      released=true;
+      for(const walker of cityPedestrians) if(walker){walker.rig.mixer.stopAllAction();scene.remove(walker.group);}
+      for(const m of [...trafficBody,cabinTraffic])m.dispose();
       owned.forEach(v=>v.dispose());
     }
   };

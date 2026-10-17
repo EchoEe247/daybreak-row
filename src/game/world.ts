@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildCity } from "@/game/city-world";
+import { loadRiggedHuman, type LoadedHuman } from "@/game/human-assets";
 import { apt, cafeB, marketB, officeB, pier, rooms } from "@/game/layout";
 import type { PlaceId } from "@/game/types";
 import type { SkySample } from "@/game/time";
@@ -666,6 +667,7 @@ export function buildWorld(scene: THREE.Scene): World {
     update,
     dispose: () => {
       city.dispose();
+      citizen.dispose();
       for (const d of disposables) d.dispose();
     },
   };
@@ -700,23 +702,41 @@ function makeCar(color: number) {
 
 function makeCitizen() {
   const g = new THREE.Group();
+  const fallback = new THREE.Group();
   const coat = new THREE.MeshStandardMaterial({ color: 0x243044, roughness: 0.8 });
+  const skin = new THREE.MeshStandardMaterial({ color: 0xc9956c, roughness: 0.6 });
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.22, 0.7, 4, 8), coat);
   body.position.y = 1.05;
-  body.castShadow = true;
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.14, 10, 8),
-    new THREE.MeshStandardMaterial({ color: 0xc9956c, roughness: 0.6 }),
-  );
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.14, 10, 8), skin);
   head.position.y = 1.62;
-  head.castShadow = true;
-  g.add(body, head);
+  fallback.add(body, head);
+  g.add(fallback);
   let phase = 0;
+  let rig: LoadedHuman | null = null;
+  let disposed = false;
+  void loadRiggedHuman("pedestrian-c").then(loaded=>{
+    if (disposed) { loaded.mixer.stopAllAction(); return; }
+    rig = loaded;
+    rig.actions.idle.stop();
+    rig.actions.walk.reset().play();
+    rig.actions.walk.setEffectiveTimeScale(0.92);
+    fallback.visible = false;
+    g.add(loaded.root);
+  }).catch(error=>console.warn("Harbor pedestrian fallback:",error));
   return {
     group: g,
     update: (dt: number, speed: number, _t: number) => {
+      if(rig){g.position.y=0;rig.mixer.update(dt);return;}
       phase += dt * speed * 6;
       g.position.y = Math.abs(Math.sin(phase)) * 0.04;
+    },
+    dispose: () => {
+      disposed = true;
+      rig?.mixer.stopAllAction();
+      body.geometry.dispose();
+      head.geometry.dispose();
+      coat.dispose();
+      skin.dispose();
     },
   };
 }

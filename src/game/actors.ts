@@ -1,11 +1,14 @@
 import * as THREE from "three";
 import type { NpcId } from "@/game/types";
+import { loadRiggedHuman, type HumanMotion, type LoadedHuman } from "@/game/human-assets";
 
 export type Actor = {
   group: THREE.Group;
   label: THREE.Sprite | null;
   update: (dt: number, speed: number, idleTime: number) => void;
   dispose: () => void;
+  humanStatus: () => "loading" | "ready" | "fallback";
+  humanAnimation: () => string;
 };
 
 type Look = {
@@ -164,7 +167,37 @@ export function createActor(kind: "player" | NpcId): Actor {
   }
 
   let phase = Math.random() * Math.PI * 2;
+  let human: LoadedHuman | null = null;
+  let motion: HumanMotion = "idle";
+  let disposedActor = false;
+  let failedAsset = false;
+
+  void loadRiggedHuman(kind).then((loaded) => {
+    if (disposedActor) {
+      loaded.mixer.stopAllAction();
+      return;
+    }
+    human = loaded;
+    group.add(loaded.root);
+    bob.visible = false;
+    if (label) label.position.y = loaded.height + 0.3;
+  }).catch((error: unknown) => {
+    failedAsset = true;
+    console.error("Daybreak Row human asset failed for " + kind, error);
+  });
+
   const update = (dt: number, speed: number, idleTime: number) => {
+    if (human) {
+      const next: HumanMotion = speed > 3.1 ? "run" : speed > 0.22 ? "walk" : "idle";
+      if (next !== motion) {
+        human.actions[next].reset().play();
+        human.actions[motion].crossFadeTo(human.actions[next], 0.2, true);
+        motion = next;
+      }
+      human.actions[next].setEffectiveTimeScale(next === "run" ? Math.max(0.85, speed / 4.45) : next === "walk" ? Math.max(0.75, speed / 2.5) : 1);
+      human.mixer.update(dt);
+      return;
+    }
     const moving = speed > 0.2;
     phase += dt * (moving ? 6.5 + speed * 1.4 : 1.4);
     const swing = moving ? Math.min(1, speed / 2.4) : 0;
@@ -181,8 +214,11 @@ export function createActor(kind: "player" | NpcId): Actor {
     group,
     label,
     update,
+    humanStatus: () => human ? "ready" : failedAsset ? "fallback" : "loading",
+    humanAnimation: () => human ? motion : "procedural-fallback",
     dispose: () => {
-      /* materials disposed globally */
+      disposedActor = true;
+      if (human) { human.mixer.stopAllAction(); group.remove(human.root); }
     },
   };
 }
