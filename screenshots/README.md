@@ -5,7 +5,8 @@ Screenshots are **illustrative browser captures, not evidence of physical Androi
 ## Recent captures from the updated game
 - `downtown-current.png` — current human rig in Downtown (game QA capture, 2026-10-16/17).
 - `bakery-current.jpg` — Old Town Bakery exterior with the updated human model.
-- `bookshop-current.jpg` — Corner Books interior with rigged characters.
+- `bookshop-current.jpg` — early Corner Books interior with rigged characters (pre-extra-asset shelving upgrade).
+- `fresh-spin-laundry-software-qa.jpg` — **new October 17 playable laundromat** with current licensed washer/dryer GLBs and player/NPC rig. This is a **software-WebGL canvas-only QA capture**, not a physical Pixel 6a screenshot.
 
 These are small (320–480 px) visual QA captures using the desktop software-rendered test browser. They are not marketing-quality shots or exact representations of the physical Pixel GPU.
 

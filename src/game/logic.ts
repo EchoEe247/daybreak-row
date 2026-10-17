@@ -230,6 +230,7 @@ export function buildActions(): Action[] {
   const gym = rooms.gym;
   const cinema = rooms.cinema;
   const bookshop = rooms.bookshop;
+  const laundry = rooms.laundry;
   const base: Action[] = [
     {
       id: "enter-home",
@@ -784,6 +785,52 @@ export function buildActions(): Action[] {
       },
     },
     {
+      id: "enter-laundry",
+      place: "street",
+      x: 82, z: -88, r: 2.3,
+      label: () => "Enter Fresh Spin Laundry",
+      run: (state) => {
+        enter(state,"laundry");
+        return done([{caption:"Fresh Spin: real washers, dryers and the low hum of the machines."}],true);
+      },
+    },
+    {
+      id: "exit-laundry",
+      place: "laundry",
+      x: laundry.door.x, z: laundry.door.z, r: 1.3,
+      label: () => "Leave Fresh Spin Laundry",
+      run: (state) => {exit(state,"laundry");return done([],true);},
+    },
+    {
+      id: "laundry-wash",
+      place: "laundry",
+      x: -1.0, z: 1223.0, r: 1.55,
+      label: () => "Wash & dry clothes · $6",
+      run: (state) => {
+        const notes:Note[]=[];
+        if(!pay(state,6,notes))return done(notes);
+        const before=state.day;
+        state.needs.hygiene=clamp(state.needs.hygiene+36);
+        state.needs.fun=clamp(state.needs.fun+3);
+        notes.push(...advance(state,42,0.8));
+        notes.push({toast:"Fresh Spin laundry complete · -$6",caption:"The drums finish their cycle. Everything feels cleaner."});
+        if(state.day===before){const stamp=stampPassport(state,"laundry");if(stamp)notes.push({toast:stamp});}
+        return done(notes);
+      },
+    },
+    {
+      id: "laundry-attendant",
+      place: "laundry",
+      x: 2.0, z: 1224.8, r: 1.3,
+      label: () => "Ask the attendant",
+      run: (state) => {
+        state.needs.social=clamp(state.needs.social+6);
+        const notes=advance(state,7,0.5);
+        notes.push({caption:"Someone has to keep the city clean, even on a bright afternoon.",toast:"Fresh Spin attendant: We close when the last load is done."});
+        return done(notes);
+      },
+    },
+    {
       id: "bench",
       place: "street",
       x: anchors.bench.x,
@@ -815,7 +862,7 @@ export function buildActions(): Action[] {
       },
     },
   ];
-  const city: Action[] = CITY_SITES.filter(site=>!["bakery","gym","cinema","bookshop"].includes(site.id)).map((site) => ({
+  const city: Action[] = CITY_SITES.filter(site=>!["bakery","gym","cinema","bookshop","laundry"].includes(site.id)).map((site) => ({
     id: "city-" + site.id,
     place: "street" as const,
     x: site.x,

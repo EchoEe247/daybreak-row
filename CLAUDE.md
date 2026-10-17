@@ -7,10 +7,11 @@ This file is the entry point for Claude or another repository-only research assi
 2. `docs/handoff/CURRENT-STATE.md` — authoritative implemented features and limits.
 3. `docs/handoff/RUNTIME-AND-QA.md` — real Android device/runtime and reproducible checks.
 4. `docs/handoff/ASSET-BASELINE.md` — what is already installed, licensing, and performance policy.
+   The October 17 [realism integration report](docs/research/REALISM-INTEGRATION-2026-10-17.md) records 23 newly installed CC0 models and the ninth enterable interior.
 5. `docs/claude/RESEARCH-BRIEF.md` — the actual assignment, methodology, and acceptance criteria.
 6. `docs/claude/README.md` — expected deliverables and exact destinations.
 
-**Authority:** Current source code, package scripts, license files and asset manifests take precedence over summaries. The handoff documents reflect a verified snapshot on 2026-10-17. Older root-level update reports describe development stages, not necessarily today's state. `AGENTS.md` contains current general project guidance; the original exported Grok-specific contract has been replaced because its `/workspace` runtime instructions did not apply to the owner's phone.
+**Authority:** Current source code, package scripts, license files and asset manifests take precedence over summaries. Subsequent October 17 development has already improved facades, shops, city props, and added an enterable laundry; investigate what remains rather than re-recommending installed assets. The handoff documents reflect a verified snapshot on 2026-10-17. Older root-level update reports describe development stages, not necessarily today's state. `AGENTS.md` contains current general project guidance; the original exported Grok-specific contract has been replaced because its `/workspace` runtime instructions did not apply to the owner's phone.
 
 ## Your assignment
 Research the **most realistic genuinely free 3D assets** suitable for improving or replacing current game assets, while preserving the Pixel 6a/Android mobile-first target. Then propose the game's future direction, a prioritized multi-phase roadmap, and measurable upgrade plan. Use the documented output folder `docs/claude/`. Distinguish independently confirmed findings from conjecture and link to original publishers/license pages.

@@ -26,7 +26,7 @@ Browser-origin local saves are not part of GitHub and will not transfer when Cla
 ## Actual check results (2026-10-17)
 | Check | Status | Interpretation |
 | --- | --- | --- |
-| `npm run test:game` | **PASS: 39/39** | Gameplay/city/NPC/discovery/door/input/asset regressions |
+| `npm run test:game` | **PASS: 42/42** | Gameplay/city/NPC/discovery/door/input/asset regressions |
 | `npm run typecheck` | **PASS** | TypeScript compilation check |
 | `npm run build` | **PASS** | Vite/Nitro production build; database migration is skipped if DATABASE_URL is absent |
 | `npm test` | **FAIL** | Original scaffold plugin PWA/branding fixtures expect unrelated demo names; **do not misreport as gameplay failure** |

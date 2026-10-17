@@ -2,7 +2,7 @@ export type NeedId = "energy" | "hunger" | "hygiene" | "social" | "fun";
 export type Needs = Record<NeedId, number>;
 
 export type NpcId = "mara" | "ellis" | "theo" | "jun" | "idris";
-export type PlaceId = "street" | "home" | "cafe" | "market" | "office" | "bakery" | "gym" | "cinema" | "bookshop";
+export type PlaceId = "street" | "home" | "cafe" | "market" | "office" | "bakery" | "gym" | "cinema" | "bookshop" | "laundry";
 
 export type GoalId =
   | "shower"

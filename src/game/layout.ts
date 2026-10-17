@@ -9,7 +9,7 @@ export const marketB = { x0: -31, x1: -14, zFront: 8, depth: 10, door: -21, floo
 
 export const pier = { x0: 2.15, x1: 6.55, z0: 19.6, z1: 31.5 };
 
-export type RoomId = "home" | "cafe" | "market" | "office" | "bakery" | "gym" | "cinema" | "bookshop";
+export type RoomId = "home" | "cafe" | "market" | "office" | "bakery" | "gym" | "cinema" | "bookshop" | "laundry";
 
 export type Room = {
   x0: number;
@@ -81,6 +81,12 @@ export const rooms: Record<RoomId, Room> = {
     spawn: { x: 0.6, z: 1124.8, yaw: 0 },
     exit: { x: 108, z: -98.4, yaw: Math.PI },
     door: { x: 0, z: 1127.55 },
+  },
+  laundry: {
+    x0: -5.15, x1: 5.15, z0: 1220.25, z1: 1228.45,
+    spawn: { x: 0.2, z: 1225.3, yaw: 0 },
+    exit: { x: 82, z: -84.5, yaw: Math.PI },
+    door: { x: 0, z: 1227.7 },
   },
 };
 

@@ -12,7 +12,7 @@
 - Named NPCs **Mara, Ellis, Theo, Jun and Idris** follow time-of-day routines, animate, support interactions and are represented in the phone's People tab.
 - City Passport: three daily destinations, actionable activity stamps, and a claimable City Hall reward ($65) once per day. District discovery grants one-time exploration rewards.
 
-## Enterable locations — current count: 8
+## Enterable locations — current count: 9
 1. Apartment (original harbor interior)
 2. Harbor Cafe
 3. Cho's Market
@@ -21,14 +21,15 @@
 6. Civic Fitness gym
 7. Metro Cinema
 8. Corner Books
+9. Fresh Spin Laundry
 
-Cinema and bookstore were **changed from outdoor-only actions into real enterable interiors** in the most recent gameplay commit (`f3be9dd`). Do not use the earlier description in `CITY-EXPANSION.md` as the final feature list.
+Cinema and bookstore were **changed from outdoor-only actions into real enterable interiors** in an earlier gameplay update (`f3be9dd`). The realism integration subsequently added an enterable Fresh Spin Laundry. The current list above supersedes historical feature counts.
 
-Other storefronts including Fresh Spin Laundry and Parcel Dispatch remain street-side interactions. **Not all buildings are enterable.** Enter/exit sequences fade out, reposition safely and fade back in. Original saves retain their format.
+Parcel Dispatch remains a street-side interaction; Fresh Spin Laundry is now enterable with real washer/dryer machines and a paid $6 wash cycle. **Not all buildings are enterable.** Enter/exit sequences fade out, reposition safely and fade back in. Original saves retain their format.
 
 ## Current character and environment art
 - Character visuals use nine rigged GLB human models, male/female idle-walk-run clips and named character animations, with a procedural fallback.
-- Assets include photographed asphalt, concrete, wood, grass, brick textures, interior furniture, GLB vehicles, tree species and transit objects. Mobile uses simplified/capped populations/graphics.
+- Assets include photographed asphalt, concrete, wood, grass, brick textures, interior furniture, GLB vehicles, tree species, transit objects and 23 new compact, source-tracked CC0 GLBs (facade modules, shop furnishings, food, utility props, city bus and laundry machines). See the [realism integration report](../research/REALISM-INTEGRATION-2026-10-17.md). Mobile uses simplified/capped populations/graphics.
 - The city contains procedural/primitive architecture and some placeholder building exteriors or interior geometry despite those asset upgrades. Current captures in `screenshots/downtown-current.png`, `screenshots/bakery-current.jpg` and `screenshots/bookshop-current.jpg` show part of this mix, **not** verified physical phone performance.
 
 ## Code orientation

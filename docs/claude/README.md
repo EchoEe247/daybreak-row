@@ -4,7 +4,7 @@
 
 ## Assignment and context
 - Start with [the research brief](RESEARCH-BRIEF.md).
-- For the implemented game and environment, read [current game state](../handoff/CURRENT-STATE.md), [runtime and QA](../handoff/RUNTIME-AND-QA.md), and [shipped asset baseline](../handoff/ASSET-BASELINE.md).
+- For the implemented game and environment, read [current game state](../handoff/CURRENT-STATE.md), [runtime and QA](../handoff/RUNTIME-AND-QA.md), [shipped asset baseline](../handoff/ASSET-BASELINE.md), and [the October 17 installed realism package](../research/REALISM-INTEGRATION-2026-10-17.md).
 - Follow repository-level [CLAUDE.md](../../CLAUDE.md).
 - The [copy-ready prompt](PROMPT-FOR-CLAUDE.md) explains the assignment to the Claude app; see the [public-access checklist](../handoff/TEMPORARY-PUBLIC-ACCESS.md) before changing visibility.
 - Current assignment is **research-only**. Do not change game code or ship new 3D assets.

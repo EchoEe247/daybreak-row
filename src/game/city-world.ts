@@ -67,6 +67,7 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   const parkGround=batch(park,25);
   const panels=batch(glass,190);
   const all=[...mass,windows,trims,details,stripes,metalBits,leaves,trunks,roofs,parkGround,panels];
+  const facadeBuildings: Array<{x:number;z:number;sx:number;sz:number;h:number;kind:number}> = [];
 
   const addPlane=(x:number,z:number,sx:number,sz:number,material:THREE.Material,y=0.012)=>{
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(sx,sz),material);
@@ -104,6 +105,7 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     mass[col%mass.length].add(x,h/2,z,sx,h,sz);
     roofs.add(x,h+0.15,z,sx+0.25,0.3,sz+0.25);
     streetColliders.push({minX:x-sx/2,maxX:x+sx/2,minZ:z-sz/2,maxZ:z+sz/2});
+    facadeBuildings.push({x,z,sx,sz,h,kind});
     // Distinct storefronts, vertical high-rise window rhythm and facade cornices.
     const floors=Math.max(1,Math.floor(h/3.1));
     const countX=Math.max(2,Math.floor((sx-1.1)/2.05));
@@ -260,6 +262,13 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     metalBits.add(site.x,1.1,site.z,0.12,1.65,0.12);
   }
 
+  // Only fetch optional detailed models while the player is outdoors and near
+  // their block. Keeps the initial phone launch and unrelated interiors lean.
+  let cityOutside=false, cityPlayerX=0, cityPlayerZ=0;
+  const placeNearCity: typeof placeRealisticProp = (target,kind,x,z,cfg={}) =>
+    placeRealisticProp(target,kind,x,z,{
+      ...cfg,shouldLoad:()=>cityOutside && Math.hypot(x-cityPlayerX,z-cityPlayerZ)<54
+    });
   const cityProps = [
     placeRealisticProp(scene,"painted_wooden_bench",66,-33,{height:0.8,yaw:Math.PI/2}),
     placeRealisticProp(scene,"painted_wooden_bench",110,-34,{height:0.8}),
@@ -281,6 +290,61 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
       )
     ),
   ];
+
+  // CC0 modular facade sections sit over selected procedural upper floors.
+  // Building collision boxes, windows, sidewalks and existing shop doors stay unchanged.
+  const selectedFacades = facadeBuildings
+    .filter((b,i)=>b.h>=19 && i%3===1).slice(0,isMobile?6:10);
+  selectedFacades.forEach((b,index)=>{
+    const industrial = index%3===2;
+    const windowKind = industrial ? "factory-window" : "urban-window";
+    const wallKind = industrial ? "factory-wall" : "urban-wall";
+    const corniceKind = industrial ? "factory-cornice" : "urban-cornice";
+    const front = b.z+b.sz/2+0.12;
+    // Preserve all interactive storefront entrances and their real-life use prompts.
+    // On non-interactive buildings, continue the detailed facade to street level
+    // instead of leaving a visually mismatched flat ground-floor frontage.
+    const interactiveFront = CITY_SITES.some(site=>Math.hypot(site.x-b.x,site.z-front)<8);
+    const floorBands = isMobile
+      ? (interactiveFront ? [1] : [0,1])
+      : (interactiveFront ? [1,2] : [0,1,2]);
+    for(const floor of floorBands) {
+      const y=floor*3.1;
+      if(y+3.1>b.h-0.3)continue;
+      for(const [col,kind] of [[-1,windowKind],[0,wallKind],[1,windowKind]] as const) {
+        cityProps.push(placeNearCity(scene,kind,b.x+col*3.0,front,{y,height:3.05}));
+      }
+    }
+    cityProps.push(placeNearCity(scene,corniceKind,b.x,front+0.06,{y:b.h-0.38,length:Math.min(b.sx,3.2)}));
+  });
+
+  // Service elevations get realistic closed garage/roller doors;
+  // keep active businesses accessible through their original triggers.
+  cityProps.push(
+    placeNearCity(scene,"factory-door",68,-107.35,{height:2.85}),
+    placeNearCity(scene,"real-shutter",63.5,-107.35,{height:2.48}),
+    placeNearCity(scene,"urban-door",149,-95.35,{height:2.62}),
+    placeNearCity(scene,"bike-rack",118,-37.4,{height:0.86,yaw:Math.PI/2}),
+    placeNearCity(scene,"bike-rack",166,-124.2,{height:0.86}),
+    placeNearCity(scene,"bike-rack",65.8,-32.3,{height:0.86}),
+    placeNearCity(scene,"real-trashbag",169,-118.8,{height:0.48}),
+    placeNearCity(scene,"real-trashbag",59,-32.7,{height:0.52}),
+    placeNearCity(scene,"real-coffee-cart",84,-11.35,{height:1.85,yaw:Math.PI}),
+    placeNearCity(scene,"real-chalkboard",84.8,-12.7,{height:1.25,yaw:-0.24}),
+    placeNearCity(scene,"real-aircon",122,-57,{height:1.15,y:29.4}),
+    placeNearCity(scene,"real-aircon",148,-57,{height:1.12,y:31.4}),
+    placeNearCity(scene,"real-chainlink",60,-115.8,{height:2.0}),
+    placeNearCity(scene,"city-bus",178,-132.2,{length:8.7,yaw:0}),
+  );
+  streetColliders.push(
+    {minX:117.3,maxX:118.7,minZ:-37.9,maxZ:-36.9},
+    {minX:165.3,maxX:166.7,minZ:-124.5,maxZ:-123.9},
+    {minX:65.3,maxX:66.3,minZ:-32.65,maxZ:-31.95},
+    {minX:82.8,maxX:85.2,minZ:-12.1,maxZ:-10.4},
+    // Parked bus and gated service fencing should not be walk-through geometry.
+    {minX:176.8,maxX:179.2,minZ:-136.6,maxZ:-127.8},
+    {minX:59,maxX:61,minZ:-116.02,maxZ:-115.58},
+  );
 
   // CC0 vehicle meshes replace the placeholder boxes after loading, without changing paths/collision.
   type RealTraffic = Awaited<ReturnType<typeof createRealisticTraffic>>;
@@ -336,6 +400,8 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
 
   return {
     update(dt:number, elapsed:number, night:number, focus:THREE.Vector3, outdoor:boolean) {
+      cityOutside=outdoor;
+      cityPlayerX=focus.x; cityPlayerZ=focus.z;
       glass.emissiveIntensity=night*0.85;
       realisticCityTrees.setVisible(outdoor);
       // Hide animated city life while the player is indoors; reduce unnecessary instance churn.

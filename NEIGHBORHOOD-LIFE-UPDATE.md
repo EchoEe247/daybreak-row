@@ -1,5 +1,7 @@
 # Neighborhood Life Update — Cinema, Bookshop & Resident Routines
 
+> **Historical record:** This update originally brought the game from six to eight interiors. Fresh Spin Laundry became the **ninth enterable interior** in the subsequent October 17 asset-realism upgrade. Refer to [the current game state](docs/handoff/CURRENT-STATE.md) and [integration report](docs/research/REALISM-INTEGRATION-2026-10-17.md) for the latest implementation.
+
 This update extends Daybreak Row from **six to eight enterable interiors** without replacing the mobile controls or changing the version-1 save format. It builds on the previous Bakery / Civic Fitness interiors.
 
 ## Metro Cinema — Downtown

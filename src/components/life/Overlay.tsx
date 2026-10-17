@@ -629,6 +629,7 @@ function PlacesTab() {
     { id: "gym", name: "Civic Fitness", hours: "Civic Quarter · workouts and trainer", icon: Briefcase },
     { id: "cinema", name: "Metro Cinema", hours: "Downtown · films, snacks and usher", icon: BookOpen },
     { id: "bookshop", name: "Corner Books", hours: "Civic Quarter · books, reading nook and bookseller", icon: BookOpen },
+    { id: "laundry", name: "Fresh Spin Laundry", hours: "Old Town · wash, dry and talk to staff", icon: BookOpen },
     { id: "pier", name: "The pier", hours: "South end, past the pocket park", icon: MapPin },
     { id: "bench", name: "Pocket park", hours: "Benches, a fountain, no fee", icon: BookOpen },
   ];

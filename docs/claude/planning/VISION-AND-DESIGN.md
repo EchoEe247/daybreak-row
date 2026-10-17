@@ -3,7 +3,7 @@
 **Status: NOT STARTED.** The current game mechanics in the canonical handoff are facts; everything here should be **Claude's proposed direction**, not an asserted owner decision.
 
 ## What the game is today
-See [CURRENT-STATE](../../handoff/CURRENT-STATE.md). The game is currently a mobile-first coastal/city life simulation with economy, needs, resident schedules, daily passport and eight interiors.
+See [CURRENT-STATE](../../handoff/CURRENT-STATE.md). The game is currently a mobile-first coastal/city life simulation with economy, needs, resident schedules, daily passport and nine interiors (including the upgraded Fresh Spin Laundry).
 
 ## Candidate directions to evaluate
 Propose at least two substantially different long-term visions. Illustrative starting questions (not requirements):

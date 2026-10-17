@@ -2,7 +2,7 @@
 
 **Research date:** 2026-10-17
 **Author:** ChatGPT / Local Workspace research pass
-**Status:** source-page research and implementation plan. **Four sample GLBs were downloaded into the Git-ignored QA workspace and inspected structurally; none has been integrated, visually approved, or benchmarked on the phone.** Independent of Claude's separate research or future ZIP.
+**Historical research snapshot:** this document was written before integration. Since then, **23 optimized/source-verified assets have been installed and a ninth laundromat interior added**. Current implementation results and limitations: [REALISM-INTEGRATION-2026-10-17.md](REALISM-INTEGRATION-2026-10-17.md). This original shortlist remains a reference; Claude's separate future research is not a dependency.
 **Target:** Pixel 6a / Android 17 / Termux / Chrome / Three.js, current source on `main`.
 
 ## Decision summary
@@ -124,4 +124,4 @@ Triangle counts above are derived from GLB triangle primitive accessor counts, n
 
 This is independent ChatGPT research in `docs/research/`. **Do not overwrite Claude's still-pending files in `docs/claude/`.** When Claude eventually delivers a ZIP, evaluate it against this source-grounded shortlist, resolve conflicting licenses and use the most practical findings from both. The game can continue evolving without waiting.
 
-**Current action recorded:** Source/repo audit; four small example GLBs downloaded to the *Git-ignored* `work/local-qa/daybreak/asset-scout/` QA folder solely for format verification. No gameplay assets installed or source modified, no physical-phone benchmark performed.
+**Subsequent action:** integration is recorded in [the current report](REALISM-INTEGRATION-2026-10-17.md). These notes reflect the earlier research phase. No actual physical-phone FPS benchmark has been performed.

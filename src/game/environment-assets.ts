@@ -9,7 +9,13 @@ export type EnvironmentSurface =
 export type EnvironmentProp =
   | "painted_wooden_bench" | "sofa_02" | "Sofa_01" | "WoodenTable_01"
   | "metal_trash_can" | "street_lamp_01" | "painted_wooden_nightstand"
-  | "bus-shelter" | "information-board" | "recycling-station" | "wayfinding-totem";
+  | "bus-shelter" | "information-board" | "recycling-station" | "wayfinding-totem"
+  | "urban-window" | "urban-door" | "urban-wall" | "urban-cornice"
+  | "factory-window" | "factory-door" | "factory-wall" | "factory-cornice"
+  | "real-shutter" | "real-shelf" | "real-steel-shelves" | "real-wood-shelves"
+  | "real-croissant" | "real-register" | "real-chalkboard" | "real-trashbag"
+  | "real-aircon" | "real-coffee-cart" | "real-chainlink"
+  | "city-bus" | "bike-rack" | "washer-dryer" | "stacked-washer-dryer";
 export type VehicleType = "realistic-sedan" | "red-sedan";
 
 // QA overrides isolate any heavy asset category without changing player/save data.
@@ -116,8 +122,17 @@ function batchStaticCar(root: THREE.Group): THREE.Group {
   return batched;
 }
 
-const glbProps = new Set<EnvironmentProp>(["bus-shelter","information-board","recycling-station","wayfinding-totem"]);
+export const REALISM_PROPS = [
+  "urban-window","urban-door","urban-wall","urban-cornice","factory-window","factory-door",
+  "factory-wall","factory-cornice","real-shutter","real-shelf","real-steel-shelves",
+  "real-wood-shelves","real-croissant","real-register","real-chalkboard","real-trashbag",
+  "real-aircon","real-coffee-cart","real-chainlink","city-bus","bike-rack",
+  "washer-dryer","stacked-washer-dryer",
+] as const satisfies readonly EnvironmentProp[];
+const realismGlbProps = new Set<string>(REALISM_PROPS);
+const glbProps = new Set<EnvironmentProp>(["bus-shelter","information-board","recycling-station","wayfinding-totem",...REALISM_PROPS]);
 function modelUrl(kind: EnvironmentProp | VehicleType) {
+  if(realismGlbProps.has(kind)) return "/environment/models/realism/"+kind+".glb";
   return kind === "realistic-sedan" || kind === "red-sedan" || glbProps.has(kind as EnvironmentProp)
     ? `/environment/models/${kind}.glb`
     : `/environment/models/${kind}/${kind}.gltf`;
@@ -140,6 +155,10 @@ type ModelPlacement = {
   /** Default aligns the natural model floor to 0 and centres the footprint. */
   x?: number; z?: number;
   shadows?: boolean;
+  /** Height above ground for counter objects, facade floors and rooftops. */
+  y?: number;
+  /** Delay nonvisible room/city model imports until required. */
+  shouldLoad?: () => boolean;
 };
 function normalizeModel(source: THREE.Group, cfg: ModelPlacement) {
   const model = source.clone(true);
@@ -172,15 +191,22 @@ export function placeRealisticProp(scene: THREE.Scene, kind: EnvironmentProp, x:
   if(skipProps) return () => {};
   let alive=true;
   const anchor = new THREE.Group();
-  anchor.position.set(x,0,z);
+  anchor.position.set(x,cfg.y??0,z);
   scene.add(anchor);
   // Defer detailed GLTF parsing until after the first playable frame.
-  const handle = window.setTimeout(()=>{
+  let handle: number;
+  const attempt = () => {
+    if(!alive)return;
+    if(cfg.shouldLoad && !cfg.shouldLoad()){
+      handle=window.setTimeout(attempt,1100);
+      return;
+    }
     void template(kind).then(sceneRoot=>{
-    if(!alive) return;
-    anchor.add(normalizeModel(sceneRoot,cfg));
+      if(!alive)return;
+      anchor.add(normalizeModel(sceneRoot,cfg));
     }).catch(err=>console.warn("Prop fallback",kind,err));
-  },550);
+  };
+  handle=window.setTimeout(attempt,550);
   return ()=>{alive=false;window.clearTimeout(handle);scene.remove(anchor);};
 }
 

@@ -15,7 +15,11 @@
 
 Environmental Poly Haven and Innerscene assets are described as **CC0 1.0** in their provenance/manifest files; character assets are documented as **MIT**. **Claude must independently verify licensing and source integrity for all new recommendations**. "Free" on a storefront is not proof of license for redistribution, commercial use, modifications, AI use or game bundling.
 
-## Current visual/technical gaps to investigate — not yet approved work
+## October 17 realism integration
+
+A source-verified, optimized **23-GLB / ~8.82 MiB** realism pack is now shipped at `public/environment/models/realism/`, with exact hashes and source/license provenance in `assets/realism-provenance.json`. The game uses selected urban/factory facade modules, realistic storefront equipment, shelves, bakery food, urban street furniture and a parked transit bus. A ninth interior, Fresh Spin Laundry, uses actual washer/dryer models. Loading is deferred until a matching room or city area is reached. See [integration details](../research/REALISM-INTEGRATION-2026-10-17.md).
+
+## Remaining visual/technical gaps to investigate — not yet approved work
 - Architecture/building shells, realistic windows, doors, materials and skyline cohesion.
 - Interior scene variety, lighting, props, believable placement and avoiding repetitive layouts.
 - More believable vehicle diversity, pedestrian animation, clothing, interaction props and NPC behaviors.

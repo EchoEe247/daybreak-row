@@ -115,6 +115,8 @@ export function placeLabel(place: string) {
       return "Metro Cinema";
     case "bookshop":
       return "Corner Books";
+    case "laundry":
+      return "Fresh Spin Laundry";
     default:
       return "Daybreak Row";
   }

@@ -11,14 +11,14 @@
 
 ## Nonnegotiable baseline
 - Target phone is a **Pixel 6a (Android 17)** using **Chrome + Termux**. This is a Three.js browser game, **not an APK**.
-- Current game has **five districts, eight enterable interiors, named scheduled NPCs, mobile virtual controls, economy/needs, local version-1 saves, daily City Passport, and district discovery**.
+- Current game has **five districts, nine enterable interiors, named scheduled NPCs, mobile virtual controls, economy/needs, local version-1 saves, daily City Passport, and district discovery**.
 - Time continues moving, but the visual world has **permanent bright midday lighting by design**.
 - Preserve playable mobile performance, existing interactions, physical door transitions, browser saves and licenses unless a later task authorizes change.
 - Real on-device FPS/thermal/battery benchmarks are **not available**. Label performance budgets as **proposed estimates**.
 - Claude **does not have the Local Workspace plugin**, so do not pretend to test the owner's phone, local server or current save.
 
 ## Research approach
-**Step 1 — audit the existing repo.** Compare current `src/game/`, `public/environment/`, `public/humans/`, `assets/`, `screenshots/` and current handoff docs. Note where present assets already solve a problem and where procedural art remains.
+**Step 1 — audit the existing repo.** Compare current `src/game/`, `public/environment/`, `public/humans/`, `public/environment/models/realism/`, `assets/realism-provenance.json`, `screenshots/` and current handoff docs, including the [October 17 implementation](../research/REALISM-INTEGRATION-2026-10-17.md). Note where present assets already solve a problem and where procedural art remains.
 
 **Step 2 — search original or well-attributed sources.** Investigate high-quality no-cost libraries/catalogs and reputable creators, starting from the documented existing Poly Haven and Innerscene sources and expanding. Source recommendations are not validated until examined independently. Distinguish:
 - **CC0/public-domain-equivalent** with evidence and caveats;

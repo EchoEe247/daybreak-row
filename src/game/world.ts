@@ -78,6 +78,7 @@ export function buildWorld(scene: THREE.Scene): World {
     gym: [],
     cinema: [],
     bookshop: [],
+    laundry: [],
   };
   const disposables: { dispose: () => void }[] = [];
 
@@ -348,6 +349,11 @@ export function buildWorld(scene: THREE.Scene): World {
   concretes.add(6.7, 0.15, 20.35, 38, 0.55, 21.05);
 
   // PBR scanned props occupy the original interaction/collision positions.
+  let activePlace: PlaceId="street";
+  type PropKind=Parameters<typeof placeRealisticProp>[1];
+  type PropConfig=NonNullable<Parameters<typeof placeRealisticProp>[4]>;
+  const placeRoomProp=(room:PlaceId,kind:PropKind,x:number,z:number,cfg:PropConfig={}) =>
+    placeRealisticProp(scene,kind,x,z,{...cfg,shouldLoad:()=>activePlace===room});
   const premiumPropDisposers = [
     placeRealisticProp(scene,"painted_wooden_bench",1.5,12.5,{height:0.82,yaw:Math.PI}),
     placeRealisticProp(scene,"painted_wooden_bench",11.6,15.7,{height:0.82}),
@@ -492,8 +498,8 @@ export function buildWorld(scene: THREE.Scene): World {
 
   const market = rooms.market;
   furnishRoom("market", 0, 620, market.x0, market.x1, market.z0, market.z1);
-  woods.add(-3.4, 0.2, 621.6, -1.2, 1.5, 624.4);
-  woods.add(0.2, 0.2, 621.8, 1.5, 1.45, 623.6);
+  // Shelf cuboids are replaced by properly scaled licensed 3D shop shelving.
+  // Their original colliders stay in place and protect the same aisles.
   woods.add(1.7, 0.85, 624.9, 3.4, 1.15, 626.2);
   colliders.market.push({ minX: -3.4, maxX: -1.2, minZ: 621.6, maxZ: 624.4 });
   colliders.market.push({ minX: 1.7, maxX: 3.4, minZ: 624.9, maxZ: 626.2 });
@@ -515,11 +521,8 @@ export function buildWorld(scene: THREE.Scene): World {
   // Working bakery: wooden display counter, 2 pastry shelves and a stainless oven.
   woods.add(-3.6,0.35,820.85,1.45,1.16,821.72);
   glasses.add(-3.6,1.17,821.01,1.45,1.78,821.63);
-  for(let i=0;i<5;i++) {
-    const x=-3.0+i*0.87;
-    woods.add(x,1.36,820.9,x+0.68,1.44,821.4);
-    woods.add(x,1.66,820.9,x+0.68,1.74,821.4);
-  }
+  // Original block-like pastry silhouettes are replaced by photographed
+  // croissant scans while the functional counter/collisions remain untouched.
   metals.add(2.5,0.35,820.8,4.1,1.88,821.8);
   glasses.add(2.65,0.95,821.66,3.95,1.64,821.76);
   metals.add(2.45,1.82,821.65,4.15,1.89,821.82);
@@ -594,14 +597,7 @@ export function buildWorld(scene: THREE.Scene): World {
   const bookshop = rooms.bookshop;
   furnishRoom("bookshop",0,1120,bookshop.x0,bookshop.x1,bookshop.z0,bookshop.z1);
   for(const x of [-3.95,-2.6,2.45,3.9]){
-    for(const y of [0.58,1.20,1.86]){
-      woods.add(x-0.44,y,1120.95,x+0.44,y+0.11,1122.55);
-    }
-    for(let i=0;i<4;i++){
-      const z=1121.03+i*0.35;
-      concretes.add(x-0.38,0.69,z-0.13,x+0.38,1.13,z+0.13);
-      glasses.add(x-0.36,1.32,z-0.12,x+0.36,1.74,z+0.11);
-    }
+    // Same original safe collision footprint, but shelves are now 3D models.
     colliders.bookshop.push({minX:x-0.48,maxX:x+0.48,minZ:1120.9,maxZ:1122.58});
   }
   woods.add(-1.05,0.67,1122.1,0.35,0.85,1122.65);
@@ -617,6 +613,45 @@ export function buildWorld(scene: THREE.Scene): World {
   scene.add(readingRug);
   disposables.push(readingRug.geometry,readingRug.material as THREE.Material);
 
+  // Real model upgrades (512px PBR maps, cache-shared GLB scenes). Grounded
+  // models keep primitive gameplay collision boxes and preserve original door
+  // and interaction coordinates for every interior.
+  premiumPropDisposers.push(
+    placeRoomProp("market","real-steel-shelves",-2.4,623.0,{height:1.53}),
+    placeRoomProp("market","real-steel-shelves",0.86,622.65,{height:1.45}),
+    placeRoomProp("market","real-register",2.8,625.4,{height:0.36,y:1.16,yaw:Math.PI}),
+    placeRoomProp("cafe","real-register",1.6,521.28,{height:0.34,y:1.16}),
+    placeRoomProp("bakery","real-register",0.67,821.35,{height:0.34,y:1.18,yaw:Math.PI}),
+    placeRoomProp("bookshop","real-wood-shelves",-3.95,1121.8,{height:1.78,yaw:Math.PI/2}),
+    placeRoomProp("bookshop","real-shelf",-2.6,1121.78,{height:1.85}),
+    placeRoomProp("bookshop","real-wood-shelves",2.45,1121.8,{height:1.78,yaw:-Math.PI/2}),
+    placeRoomProp("bookshop","real-shelf",3.9,1121.78,{height:1.85,yaw:-Math.PI/2}),
+    placeRoomProp("bookshop","real-wood-shelves",-0.5,1121.1,{height:1.45}),
+    placeRoomProp("bookshop","real-register",2.6,1124.55,{height:0.38,y:0.64,yaw:Math.PI}),
+    ...[-3.1,-2.2,-1.35,-0.5,0.35].map((x,index)=>
+      placeRoomProp("bakery","real-croissant",x,821.13+index%2*0.25,{height:0.12,y:1.18,yaw:index*0.47})
+    ),
+  );
+
+  // Fresh Spin: a real ninth interior, with a safe entry/exit and actual
+  // front-loading machines instead of an outdoor-only menu transaction.
+  // Keep machines around the perimeter so the main door, entrance point and
+  // 1.3m interaction ranges stay walkable.
+  const laundry = rooms.laundry;
+  furnishRoom("laundry",0,1220,laundry.x0,laundry.x1,laundry.z0,laundry.z1);
+  for(const [x,z,w] of [[-3.45,1221.6,1.05],[-1.9,1221.6,1.05],[2.1,1221.6,1.05],[3.55,1221.6,1.05]]){
+    colliders.laundry.push({minX:x-w/2,maxX:x+w/2,minZ:z-0.55,maxZ:z+0.56});
+  }
+  woods.add(-4.4,0.62,1225.9,-2.8,0.84,1226.55);
+  colliders.laundry.push({minX:-4.4,maxX:-2.8,minZ:1225.9,maxZ:1226.55});
+  premiumPropDisposers.push(
+    placeRoomProp("laundry","washer-dryer",-3.45,1221.6,{height:1.55}),
+    placeRoomProp("laundry","washer-dryer",-1.9,1221.6,{height:1.55}),
+    placeRoomProp("laundry","stacked-washer-dryer",2.1,1221.6,{height:1.74}),
+    placeRoomProp("laundry","stacked-washer-dryer",3.55,1221.6,{height:1.74}),
+    placeRoomProp("laundry","real-shelf",-3.6,1224.2,{height:1.6}),
+  );
+
   // Two local residents reuse the existing, fully rigged licensed human models.
   // Their animation mixers tick only when the corresponding indoor venue is active.
   const venueResidents: Array<{ place: PlaceId; rig: LoadedHuman }> = [];
@@ -626,6 +661,7 @@ export function buildWorld(scene: THREE.Scene): World {
     {place:"gym" as PlaceId, kind:"pedestrian-a" as const,x:2.95,z:924.2,yaw:1.9},
     {place:"cinema" as PlaceId, kind:"pedestrian-c" as const,x:3.9,z:1025.4,yaw:2.0},
     {place:"bookshop" as PlaceId, kind:"pedestrian-b" as const,x:0.9,z:1125.15,yaw:1.1},
+    {place:"laundry" as PlaceId, kind:"pedestrian-c" as const,x:2.0,z:1224.8,yaw:2.1},
   ]) {
     void loadRiggedHuman(resident.kind).then(rig=>{
       if(residentsDisposed){rig.mixer.stopAllAction();return;}
@@ -750,6 +786,7 @@ export function buildWorld(scene: THREE.Scene): World {
   ];
 
   function update(dt: number, skySample: SkySample, focus: THREE.Vector3, place: PlaceId, elapsed: number) {
+    activePlace=place;
     sky.position.copy(focus);
     (skyMat.uniforms.uZenith.value as THREE.Color).set(skySample.zenith);
     (skyMat.uniforms.uHorizon.value as THREE.Color).set(skySample.horizon);

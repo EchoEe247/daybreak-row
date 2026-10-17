@@ -13,7 +13,7 @@ Additional current captures: [Old Town Bakery exterior](screenshots/bakery-curre
 ## What you can do
 
 - **Explore five connected districts:** Daybreak Row, Old Town, Civic Quarter, Downtown, and Arts & Station.
-- **Enter eight interiors:** your apartment, Harbor Cafe, Cho's Market, Northline Office, Old Town Bakery, Civic Fitness, Metro Cinema, and Corner Books.
+- **Enter nine interiors:** your apartment, Harbor Cafe, Cho's Market, Northline Office, Old Town Bakery, Civic Fitness, Metro Cinema, Corner Books, and Fresh Spin Laundry.
 - **Live a daily routine:** shop, eat, work, exercise, read, see a movie, and manage money, energy, hunger, hygiene, fun, and social needs.
 - **Meet residents:** named characters follow scheduled routines and offer conversations; the in-game phone's **People** tab shows their current whereabouts.
 - **Complete city activities:** use the **City** phone tab to view districts and transit, stamp three destinations on the daily City Passport, then claim a reward at City Hall.
@@ -21,7 +21,7 @@ Additional current captures: [Old Town Bakery exterior](screenshots/bakery-curre
 - **Travel around town:** explore on foot or use the paid in-game transit stops.
 - **Enjoy a consistent daytime world:** the scene remains sunlit even while the simulation clock, schedules, and daily systems continue advancing.
 
-The city includes moving ambient vehicles, walking pedestrians, parks and plazas, storefronts, environmental props, and locally bundled character, vehicle, and environment models. Not every building can be entered; some locations are exterior-only interactions or scenery.
+The city includes moving ambient vehicles, walking pedestrians, parks and plazas, realistic modular building facades, storefronts, PBR furniture and food props, street furniture, a parked city bus, and locally bundled character and environment models. Not every building can be entered; some locations are exterior-only interactions or scenery.
 
 ## Play on Android (Termux)
 
@@ -81,7 +81,7 @@ npm run build
 npm run lint
 ```
 
-**Validation snapshot (October 17, 2026):** 39/39 gameplay tests, typecheck, and production build pass. The broader `npm test` script has existing scaffold/PWA branding fixture failures and `npm run lint` reports two existing findings. See [Runtime and QA](docs/handoff/RUNTIME-AND-QA.md) before interpreting results.
+**Validation snapshot (October 17, 2026):** 42/42 gameplay and asset tests, typecheck, and production build pass. The broader `npm test` script has existing scaffold/PWA branding fixture failures and `npm run lint` reports two existing findings. See [Runtime and QA](docs/handoff/RUNTIME-AND-QA.md) before interpreting results.
 
 ## Tech and organization
 
@@ -104,9 +104,9 @@ npm run lint
 
 This repository is self-contained for source and documentation research but **does not expose the owner's live phone or local server**. Read [CLAUDE.md](CLAUDE.md), [current game state](docs/handoff/CURRENT-STATE.md), [runtime and QA](docs/handoff/RUNTIME-AND-QA.md), and [shipped asset inventory](docs/handoff/ASSET-BASELINE.md). Claude's structured assignment and deliverables live under [docs/claude/](docs/claude/README.md). For sharing with an external assistant, use the [copy-ready Claude prompt](docs/claude/PROMPT-FOR-CLAUDE.md) and review the [temporary public-access checklist](docs/handoff/TEMPORARY-PUBLIC-ACCESS.md).
 
-The [screenshot guide](screenshots/README.md) distinguishes current game captures from outdated previews.
+The [screenshot guide](screenshots/README.md) distinguishes current game captures from outdated previews, including a [verified rendering of the new Fresh Spin Laundry](screenshots/fresh-spin-laundry-software-qa.jpg).
 
-[Independent realism asset research](docs/research/README.md) includes researched replacement/addition candidates and a mobile-first integration plan. It is maintained separately from Claude's pending findings.
+[Realism asset research and implementation](docs/research/README.md) includes source-verified CC0 replacements/additions, optimization details and the live integration guide. It is maintained separately from Claude's pending findings.
 
 ## Development notes
 

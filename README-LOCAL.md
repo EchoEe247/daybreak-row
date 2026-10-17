@@ -22,10 +22,10 @@ The script detects an already-running server; otherwise it launches the developm
 ## Gameplay and controls
 Drag the lower-left virtual joystick to walk/strafe; hold **Run** with another finger to sprint; drag the world to look; tap **Use** near an action. The in-game **Phone** contains City and People information.
 
-Five connected districts: Daybreak Row, Old Town, Civic Quarter, Downtown, and Arts & Station. **Eight enterable interiors:** apartment, Harbor Cafe, Cho's Market, Northline Office, Old Town Bakery, Civic Fitness, Metro Cinema, Corner Books. Additional storefronts (e.g. laundry and courier) remain sidewalk-based interactions. Named NPC routines, economy/needs, daily passport and district discovery exist. Daylight is deliberately fixed visually even though the simulation clock moves.
+Five connected districts: Daybreak Row, Old Town, Civic Quarter, Downtown, and Arts & Station. **Nine enterable interiors:** apartment, Harbor Cafe, Cho's Market, Northline Office, Old Town Bakery, Civic Fitness, Metro Cinema, Corner Books, Fresh Spin Laundry. Parcel Dispatch and other selected activities remain sidewalk-based interactions; Fresh Spin Laundry has a real wash/dry interior. Named NPC routines, economy/needs, daily passport and district discovery exist. Daylight is deliberately fixed visually even though the simulation clock moves.
 
 ## Validated check results — 2026-10-17
-- `npm run test:game`: **39/39 pass**
+- `npm run test:game`: **42/42 pass**
 - `npm run typecheck`: **pass**
 - `npm run build`: **pass**, with nonfatal dependency warnings; missing DATABASE_URL skips the optional migration
 - `npm test`: **fails original scaffold branding/PWA test assumptions**; not equivalent to failed game tests
