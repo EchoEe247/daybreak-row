@@ -20,7 +20,7 @@ import { npcScheduleDescription } from "@/game/npc-routines";
 import { CITY_STOPS, CITY_SITES, DISTRICTS, AVENUES, CROSS_STREETS, districtAt } from "@/game/city-layout";
 import { CITY_ROUTE_REWARD, passportSnapshot } from "@/game/city-passport";
 import { DISTRICT_BONUS, EXPLORER_BONUS, discoveredIds } from "@/game/discovery";
-import { gameApi, useUi } from "@/game/store";
+import { exportSave, gameApi, useUi } from "@/game/store";
 import { input } from "@/game/input";
 import { VirtualStick, type StickVector } from "@/game/virtual-stick";
 import { clockLabel, placeLabel, weekday } from "@/game/time";
@@ -85,6 +85,19 @@ export function Overlay() {
   );
 }
 
+function SaveRecovery() {
+  const warning=useUi(s=>s.saveError);
+  const mode=useUi(s=>s.mode);
+  if (!warning) return null;
+  return <div role="alert" className="mt-3 rounded-xl border border-clay p-3 text-sm text-ink">
+    <p>{warning}</p>
+    <div className="mt-2 flex flex-wrap gap-2">
+      {mode!=="title" ? <button type="button" className="rounded-lg border px-3 py-2" onClick={()=>gameApi.retrySave()}>Retry save</button> : null}
+      <button type="button" className="rounded-lg border px-3 py-2" onClick={()=>{try{exportSave();}catch{useUi.setState({saveError:"Export blocked by browser permissions. Keep this tab open."});}}}>Export recovery data</button>
+    </div>
+  </div>;
+}
+
 function Title() {
   const hasSave = useUi((s) => s.hasSave);
   const ready = useUi((s) => s.ready);
@@ -96,6 +109,7 @@ function Title() {
       <section className="sheet pointer-events-auto w-full max-w-md overflow-y-auto rounded-3xl border border-line bg-paper/95 px-5 py-5 text-ink shadow-xl">
         <p className="text-xs font-medium tracking-[0.22em] text-clay uppercase">Coastal life sim</p>
         <h1 className="font-display mt-1 text-4xl leading-none text-ink sm:mt-2 sm:text-5xl">Daybreak Row</h1>
+        <SaveRecovery />
         <p className="mt-2 text-sm leading-relaxed text-dusk sm:mt-3 sm:text-base">
           A walk-up, a shift at nine, and a street that learns your name.
         </p>
@@ -465,6 +479,7 @@ function PauseCard() {
     <div className="absolute inset-0 grid place-items-center bg-dusk-2/50 px-5">
       <section className="pointer-events-auto w-full max-w-sm rounded-3xl bg-paper px-5 py-5 text-ink">
         <h2 className="font-display text-4xl leading-none">Paused</h2>
+        <SaveRecovery />
         <p className="mt-2 text-sm leading-relaxed text-dusk">
           The street holds still. WASD or the stick walks you. Use talks, eats, works, and opens doors. Drag to look
           around. Rent leaves on Monday mornings.

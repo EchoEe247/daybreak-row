@@ -82,10 +82,7 @@ export function attachInput(canvas: HTMLCanvasElement) {
     const t = e.target;
     if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    if (e.repeat) {
-      input.keys.add(e.code);
-      return;
-    }
+    if (e.repeat) return;
     input.keys.add(e.code);
     if (e.code === "KeyE" || e.code === "Space" || e.code === "KeyF") input.interactQueued = true;
     if (e.code === "KeyP") input.phoneQueued = true;
@@ -97,6 +94,9 @@ export function attachInput(canvas: HTMLCanvasElement) {
   const clear = () => {
     input.keys.clear();
     input.runHeld = false;
+    input.phoneQueued = false;
+    input.pauseQueued = false;
+    input.interactQueued = false;
     input.pointerLooking = false;
     input.stickX = 0;
     input.stickY = 0;

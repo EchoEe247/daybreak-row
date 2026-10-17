@@ -26,11 +26,13 @@ Browser-origin local saves are not part of GitHub and will not transfer when Cla
 ## Actual check results (2026-10-17)
 | Check | Status | Interpretation |
 | --- | --- | --- |
-| `npm run test:game` | **PASS: 42/42** | Gameplay/city/NPC/discovery/door/input/asset regressions |
+| `npm run test:game` | **PASS: 48/48** | Gameplay/city/NPC/discovery/door/input/asset regressions |
 | `npm run typecheck` | **PASS** | TypeScript compilation check |
 | `npm run build` | **PASS** | Vite/Nitro production build; database migration is skipped if DATABASE_URL is absent |
-| `npm test` | **FAIL** | Original scaffold plugin PWA/branding fixtures expect unrelated demo names; **do not misreport as gameplay failure** |
-| `npm run lint` | **FAIL: 2 errors** | Existing `src/game/human-assets.test.mjs:1` (@ts-nocheck) and `src/lib/app-data/client.server.ts:281` (empty block) |
+| `npm test` | **PASS** | Retained scaffold/PWA and framework tests now use isolated fixture branding |
+| `npm run lint` | **PASS** | Existing lint issues repaired, without hiding affected files |
+
+The new `npm run test:all` aggregate runs general tests, gameplay, types, lint and build. An isolated mobile performance HUD is available using `?perfqa=1`; it has **not** yet produced a sustained physical-device baseline. See [mobile acceptance procedure](../qa/MOBILE-ACCEPTANCE.md).
 
 Build also displays warnings from some dependency `use client` directives; this did not cause a build failure. The check results are a timestamped baseline, **not promises for future commits**.
 

@@ -22,8 +22,8 @@ import {
   type Note,
   type Action,
 } from "@/game/logic";
-import { bindGame, clearSave, loadSave, useUi, writeSave } from "@/game/store";
-import { PERMANENT_DAYLIGHT } from "@/game/time";
+import { bindGame, clearSave, loadSaveStatus, useUi, writeSave } from "@/game/store";
+import { absMinute, PERMANENT_DAYLIGHT } from "@/game/time";
 import type { GameState, Mode, NpcId, PlaceId } from "@/game/types";
 import { buildWorld, type Collider } from "@/game/world";
 
@@ -133,6 +133,16 @@ function camClip(px: number, pz: number, tx: number, tz: number, boxes: Collider
 export function mountGame(canvas: HTMLCanvasElement) {
   const coarse = window.matchMedia("(pointer: coarse)").matches || new URLSearchParams(window.location.search).has("mobile-qa");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, powerPreference: "high-performance" });
+  const perfEnabled=new URLSearchParams(window.location.search).has("perfqa");
+  const perfHud=perfEnabled ? document.createElement("div") : null;
+  if(perfHud){
+    perfHud.setAttribute("aria-label","Performance measurements");
+    perfHud.style.cssText="position:fixed;right:8px;bottom:155px;background:#15202bd9;color:white;padding:6px 9px;border-radius:7px;font:12px monospace;z-index:9999;pointer-events:none";
+    perfHud.textContent="FPS: collecting";
+    document.body.appendChild(perfHud);
+  }
+  let fpsFrames=0, fpsTime=0, fpsWorst=0;
+
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
@@ -160,7 +170,9 @@ export function mountGame(canvas: HTMLCanvasElement) {
   const timer = new THREE.Timer();
   timer.connect(document);
 
-  let saved = loadSave();
+  const loadedSave = loadSaveStatus(localStorage);
+  let saved = loadedSave.state;
+  let saveIssue: string | null = loadedSave.issue;
   let play: GameState | null = null;
   const preview = freshState("Alex");
   let mode: Mode = "title";
@@ -180,7 +192,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
   let promptKind: "act" | "npc" | null = null;
   let busyUntil = 0;
   let doorTransition: { action: Action; phase: "closing" | "opening"; deadline: number } | null = null;
-  let saveMinute = -999;
+  let lastSaveAttempt = -999;
   const camPos = new THREE.Vector3();
   const camDest = new THREE.Vector3();
   const look = new THREE.Vector3();
@@ -241,6 +253,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
         : null;
     useUi.setState({
       ready: true,
+      saveError:saveIssue,
       mode,
       hasSave: !!saved || !!play,
       name: play?.name ?? s.name,
@@ -280,9 +293,15 @@ export function mountGame(canvas: HTMLCanvasElement) {
 
   function remember() {
     if (!play) return;
-    writeSave(play);
-    saved = play;
-    saveMinute = play.day * 1440 + play.minute;
+    lastSaveAttempt=absMinute(play.day,play.minute);
+    if (writeSave(play)){
+      saved = structuredClone(play);
+      saveIssue=null;
+    } else {
+      saveIssue="Progress could not be saved. Retry or export your recovery data before closing.";
+      pushToast("Save failed — storage may be full or blocked.");
+      sync(true);
+    }
   }
 
   function begin(state: GameState) {
@@ -303,6 +322,16 @@ export function mountGame(canvas: HTMLCanvasElement) {
     sync(true);
   }
 
+  function setMenu(next: "play" | "pause" | "phone") {
+    if (!play || (mode!=="play" && mode!=="pause" && mode!=="phone")) return;
+    mode=next;
+    input.keys.clear();
+    input.stickX=0;input.stickY=0;input.runHeld=false;
+    input.interactQueued=false;input.phoneQueued=false;input.pauseQueued=false;
+    input.lookDx=0;input.lookDy=0;input.pointerLooking=false;
+    speed=0;
+    sync(true);
+  }
   bindGame({
     startNew: (name) => begin(freshState(name)),
     continue: () => {
@@ -311,6 +340,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
     },
     newLife: () => {
       clearSave();
+      saveIssue=null;
       saved = null;
       play = null;
       mode = "title";
@@ -338,33 +368,10 @@ export function mountGame(canvas: HTMLCanvasElement) {
       pushToast("Transit to " + stop.name + " · -$5");
       remember();sync(true);
     },
-    openPhone: () => {
-      if (mode === "play") {
-        mode = "phone";
-        sync(true);
-      }
-    },
-    closePhone: () => {
-      if (mode === "phone") {
-        mode = "play";
-        sync(true);
-      }
-    },
-    pause: () => {
-      if (mode === "play") {
-        mode = "pause";
-        sync(true);
-      } else if (mode === "pause") {
-        mode = "play";
-        sync(true);
-      }
-    },
-    resume: () => {
-      if (mode === "pause" || mode === "phone") {
-        mode = "play";
-        sync(true);
-      }
-    },
+    openPhone: () => setMenu(mode==="phone"?"play":"phone"),
+    closePhone: () => setMenu("play"),
+    pause: () => setMenu(mode==="pause"?"play":"pause"),
+    resume: () => setMenu("play"),
     quit: () => {
       remember();
       play = null;
@@ -372,6 +379,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       speed = 0;
       sync(true);
     },
+    retrySave: () => { remember(); sync(true); },
     choose: (index) => {
       if (!play || mode !== "dialogue" || !dialogueNpc) return;
       const result = applyChoice(play, dialogueNpc, dialogueNode, index);
@@ -577,19 +585,12 @@ export function mountGame(canvas: HTMLCanvasElement) {
     }
     const title = mode === "title" || !play;
 
-    if (!title && play && (mode === "play" || mode === "sleep" || mode === "shift")) {
-      if (input.phoneQueued && mode === "play") {
-        mode = "phone";
-        input.phoneQueued = false;
-      } else input.phoneQueued = false;
-      if (input.pauseQueued && mode === "play") {
-        mode = "pause";
-        input.pauseQueued = false;
-      } else input.pauseQueued = false;
-    } else {
-      input.phoneQueued = false;
-      input.pauseQueued = false;
+    if (!title && play && (mode==="play" || mode==="pause" || mode==="phone")) {
+      if (input.phoneQueued) setMenu(mode==="phone"?"play":"phone");
+      else if (input.pauseQueued) setMenu(mode==="play"?"pause":"play");
     }
+    input.phoneQueued=false;
+    input.pauseQueued=false;
 
     if (seq && play && (mode === "sleep" || mode === "shift")) {
       seq.t += dt;
@@ -646,7 +647,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       const flow = 2.15 * dt;
       const notes = advance(play, flow, 1);
       if (notes.length) showNotes(notes);
-      const nowAbs = play.day * 1440 + play.minute;
+      const nowAbs = absMinute(play.day, play.minute);
       if (play.needs.energy <= 0 && nowAbs > play.collapseAt + 20) {
         const dropped = collapse(play);
         showNotes(dropped);
@@ -658,7 +659,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       if (input.interactQueued) triggerInteract();
       input.interactQueued = false;
 
-      if (Math.floor(nowAbs) - Math.floor(saveMinute) > 12) remember();
+      if (Math.floor(nowAbs) - Math.floor(lastSaveAttempt) > 12) remember();
     } else {
       input.interactQueued = false;
       speed += (0 - speed) * Math.min(1, dt * 6);
@@ -790,9 +791,17 @@ export function mountGame(canvas: HTMLCanvasElement) {
       if (mode === "play" || mode === "shift" || mode === "sleep") sync(false);
     }
     renderer.render(scene, camera);
+    if(perfHud){
+      fpsFrames++;fpsTime+=dt;fpsWorst=Math.max(fpsWorst,dt);
+      if(fpsTime>=2){
+        const fps=Math.round(fpsFrames/fpsTime);
+        perfHud.textContent=`FPS ~${fps} | worst ${(fpsWorst*1000).toFixed(0)}ms | draws ${renderer.info.render.calls} | tris ${renderer.info.render.triangles} | textures ${renderer.info.memory.textures}`;
+        fpsFrames=0;fpsTime=0;fpsWorst=0;
+      }
+    }
   });
 
-  useUi.setState({ ready: true, hasSave: !!saved, mode: "title" });
+  useUi.setState({ ready: true, hasSave: !!saved, saveError:saveIssue, mode: "title" });
 
   return () => {
     renderer.setAnimationLoop(null);
@@ -801,9 +810,12 @@ export function mountGame(canvas: HTMLCanvasElement) {
     window.removeEventListener("pagehide", onPageHide);
     detachInput();
     audio.dispose();
+    player.dispose();
+    for (const id of NPCS) npcs[id].dispose();
     world.dispose();
     disposeActorMaterials();
     renderer.dispose();
+    perfHud?.remove();
     bindGame({
       startNew: () => {},
       continue: () => {},
@@ -816,6 +828,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       resume: () => {},
       quit: () => {},
       choose: () => {},
+      retrySave: () => {},
     });
     delete window.__controlsTest;
   };
