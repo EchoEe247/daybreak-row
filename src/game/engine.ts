@@ -45,6 +45,10 @@ declare global {
       getHumanQA: () => Record<string, { status: string; motion: string; visible: boolean }>;
       getRenderQA: () => { draws: number; triangles: number; textures: number; geometries: number; sceneNodes: number };
       getSceneCostsQA: () => Array<{ name: string; tris: number; instances: number }>;
+      getAssetsQA: (() => Array<{kind:string;x:number;y:number;z:number;loaded:boolean; bounds?:{minX:number;minY:number;minZ:number;maxX:number;maxY:number;maxZ:number}}>) | undefined;
+      getCollidersQA: (() => Record<PlaceId, Collider[]>) | undefined;
+      getActionsQA: (() => Array<{id:string;place:PlaceId;x:number;z:number;r:number}>) | undefined;
+      getRoomsQA: (() => typeof rooms) | undefined;
       getPlace: () => PlaceId;
       getCameraPosition: () => { x: number; y: number; z: number };
       getTransition: () => { label: string | null; veil: number };
@@ -501,6 +505,28 @@ export function mountGame(canvas: HTMLCanvasElement) {
       });
       return items.sort((a,b)=>b.tris-a.tris).slice(0,32);
     },
+    getAssetsQA: new URLSearchParams(window.location.search).has("touchqa") ? () => {
+      const items: Array<{kind:string;x:number;y:number;z:number;loaded:boolean;bounds?:{minX:number;minY:number;minZ:number;maxX:number;maxY:number;maxZ:number}}>=[];
+      scene.updateMatrixWorld(true);
+      scene.traverse(node=>{
+        const p=node.userData.placement as {kind:string;x:number;y:number;z:number} | undefined;
+        if(!p)return;
+        const meshes: THREE.Mesh[]=[];
+        node.traverse(desc=>{if((desc as THREE.Mesh).isMesh)meshes.push(desc as THREE.Mesh);});
+        const loaded=meshes.length>0;
+        const item: typeof items[number]={...p,loaded};
+        if(loaded){
+          const b=new THREE.Box3().setFromObject(node);
+          item.bounds={minX:b.min.x,minY:b.min.y,minZ:b.min.z,maxX:b.max.x,maxY:b.max.y,maxZ:b.max.z};
+        }
+        items.push(item);
+      });
+      return items;
+    } : undefined,
+    getCollidersQA: new URLSearchParams(window.location.search).has("touchqa") ? () => world.colliders : undefined,
+    getActionsQA: new URLSearchParams(window.location.search).has("touchqa")
+      ? () => actions.map(a=>({id:a.id,place:a.place,x:a.x,z:a.z,r:a.r})) : undefined,
+    getRoomsQA: new URLSearchParams(window.location.search).has("touchqa") ? () => rooms : undefined,
     getPlace: () => sim().place,
     getCameraPosition: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z }),
     getTransition: () => ({ label: useUi.getState().transitionLabel, veil: useUi.getState().veil }),

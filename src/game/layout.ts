@@ -102,7 +102,7 @@ export const anchors = {
   pierLook: { x: 4.3, z: 28.4 },
   fridge: { x: 2.45, z: 423.55 },
   stove: { x: 1.35, z: 423.55 },
-  shower: { x: 2.45, z: 421.55 },
+  shower: { x: 1.32, z: 421.55 },
   bed: { x: -2.05, z: 422.15 },
   desk: { x: -2.35, z: 424.55 },
   sofa: { x: -0.15, z: 423.7 },

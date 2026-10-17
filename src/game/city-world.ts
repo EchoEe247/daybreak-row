@@ -176,10 +176,17 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
 
   // City trees and curb furniture. Trunks are solid obstacles, crowns do not occlude the pavement.
   const treePts: Array<[number,number]>=[];
+  // Offset street trees toward the curb, not into building facade geometry.
+  // Original trunk positions cleared pedestrians but the ~2m crowns clipped
+  // directly through some ground/upper-floor windows.
+  const curbTreeX: Record<number,number> = {
+    48:48, 62:60.3, 89:90.5, 102:100.3,
+    128:130.5, 142:140.3, 169:170.5, 182:182,
+  };
   for(const x of [48,62,89,102,128,142,169,182]){
     for(const z of [-15,-32,-58,-73,-100,-115,-137]){
       if((x+z*3)%5===0 || (x===102&&z===-100)) continue;
-      treePts.push([x+(z%2)*0.6,z]);
+      treePts.push([curbTreeX[x]+(z%2)*0.6,z]);
     }
   }
   const isMobile = window.matchMedia("(pointer: coarse)").matches || new URLSearchParams(window.location.search).has("mobile-qa");
@@ -215,11 +222,11 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     const mesh=new THREE.Mesh(geom,mat);mesh.position.set(x,y,z);scene.add(mesh);
     owned.push(tex,mat,geom);
   }
-  sign("OLD TOWN",70,4.0,-7.35,8);
-  sign("PUBLIC LIBRARY",111,4.6,-7.9,8);
-  sign("DOWNTOWN",126,15,-48.4,10);
-  sign("CENTRAL STATION",157,5,-121,10);
-  sign("CITY GALLERY",152,5,-90,7);
+  sign("OLD TOWN",70,6.1,-10.32,8);
+  sign("PUBLIC LIBRARY",108,4.6,-9.30,8);
+  sign("DOWNTOWN",122,15,-51.30,10);
+  sign("CENTRAL STATION",162,5,-116.20,10);
+  sign("CITY GALLERY",149,5,-95.30,7);
   sign("CITY ROUTE BOARD",71,3.1,-10.35,5.5);
 
   // Six unmistakable walk-to storefronts. Buildings retain their original
@@ -265,28 +272,34 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   // Only fetch optional detailed models while the player is outdoors and near
   // their block. Keeps the initial phone launch and unrelated interiors lean.
   let cityOutside=false, cityPlayerX=0, cityPlayerZ=0;
+  const sidewalkHeight = (x:number,z:number) =>
+    cols.some(([a,b])=>x>=a&&x<=b) && rows.some(([a,b])=>z>=a&&z<=b) ? 0.185 : 0.02;
+  // Old and new street furniture shares the same sidewalk grounding.
+  const placeStreetAsset: typeof placeRealisticProp = (target,kind,x,z,cfg={}) =>
+    placeRealisticProp(target,kind,x,z,{...cfg,y:cfg.y??sidewalkHeight(x,z)});
   const placeNearCity: typeof placeRealisticProp = (target,kind,x,z,cfg={}) =>
     placeRealisticProp(target,kind,x,z,{
-      ...cfg,shouldLoad:()=>cityOutside && Math.hypot(x-cityPlayerX,z-cityPlayerZ)<54
+      ...cfg,y:cfg.y??sidewalkHeight(x,z),
+      shouldLoad:()=>cityOutside && Math.hypot(x-cityPlayerX,z-cityPlayerZ)<54
     });
   const cityProps = [
-    placeRealisticProp(scene,"painted_wooden_bench",66,-33,{height:0.8,yaw:Math.PI/2}),
-    placeRealisticProp(scene,"painted_wooden_bench",110,-34,{height:0.8}),
-    placeRealisticProp(scene,"painted_wooden_bench",145,-81,{height:0.8,yaw:Math.PI/2}),
-    placeRealisticProp(scene,"metal_trash_can",52,-14,{height:1.03}),
-    placeRealisticProp(scene,"metal_trash_can",95,-42,{height:1.03}),
-    placeRealisticProp(scene,"metal_trash_can",138,-80,{height:1.03}),
-    placeRealisticProp(scene,"metal_trash_can",179,-121,{height:1.03}),
-    placeRealisticProp(scene,"bus-shelter",141.5,-75,{height:2.48,yaw:Math.PI}),
-    placeRealisticProp(scene,"bus-shelter",182,-114,{height:2.48,yaw:Math.PI / 2}),
-    ...(isMobile ? [] : [placeRealisticProp(scene,"bus-shelter",101.5,-32,{height:2.48,yaw:0})]),
-    placeRealisticProp(scene,"information-board",140.5,-81,{height:2.05}),
-    placeRealisticProp(scene,"wayfinding-totem",177,-119,{height:2.22}),
-    placeRealisticProp(scene,"recycling-station",106,-34,{height:0.96}),
-    placeRealisticProp(scene,"recycling-station",135,-80,{height:0.96}),
+    placeStreetAsset(scene,"painted_wooden_bench",66,-33,{height:0.8,yaw:Math.PI/2}),
+    placeStreetAsset(scene,"painted_wooden_bench",110,-35.25,{height:0.8}),
+    placeStreetAsset(scene,"painted_wooden_bench",145,-79.2,{height:0.8,yaw:Math.PI/2}),
+    placeStreetAsset(scene,"metal_trash_can",46.5,-14,{height:1.03}),
+    placeStreetAsset(scene,"metal_trash_can",102.7,-35.2,{height:1.03}),
+    placeStreetAsset(scene,"metal_trash_can",140.4,-72,{height:1.03}),
+    placeStreetAsset(scene,"metal_trash_can",182,-123.5,{height:1.03}),
+    placeStreetAsset(scene,"bus-shelter",140.3,-78,{height:2.48,yaw:Math.PI/2}),
+    placeStreetAsset(scene,"bus-shelter",182,-114,{height:2.48,yaw:Math.PI / 2}),
+    ...(isMobile ? [] : [placeStreetAsset(scene,"bus-shelter",101.5,-32,{height:2.48,yaw:0})]),
+    placeStreetAsset(scene,"information-board",140.5,-81,{height:2.05}),
+    placeStreetAsset(scene,"wayfinding-totem",181,-119,{height:2.22}),
+    placeStreetAsset(scene,"recycling-station",106,-35.25,{height:0.96}),
+    placeStreetAsset(scene,"recycling-station",135,-80,{height:0.96}),
     ...[52,92,132,172].flatMap((x, i) =>
       [-14,-60,-104,-145].filter((_, j) => (i*4+j)%(isMobile?8:4)===0).map(z =>
-        placeRealisticProp(scene,"street_lamp_01",x,z,{height:5.15})
+        placeStreetAsset(scene,"street_lamp_01",x===52?49:x===132?129.4:x,z,{height:5.15})
       )
     ),
   ];
@@ -312,10 +325,15 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
       const y=floor*3.1;
       if(y+3.1>b.h-0.3)continue;
       for(const [col,kind] of [[-1,windowKind],[0,wallKind],[1,windowKind]] as const) {
+        // The real service door and roller shutter replace these two bays;
+        // stacking multiple opaque facades here produced z-fighting.
+        if(floor===0 && Math.abs(b.x-68)<0.3 && Math.abs(front+107.33)<0.3 && col!==1)continue;
         cityProps.push(placeNearCity(scene,kind,b.x+col*3.0,front,{y,height:3.05}));
       }
     }
-    cityProps.push(placeNearCity(scene,corniceKind,b.x,front+0.06,{y:b.h-0.38,length:Math.min(b.sx,3.2)}));
+    for(const col of [-1,0,1]){
+      cityProps.push(placeNearCity(scene,corniceKind,b.x+col*3.0,front+0.06,{y:b.h-0.38,length:Math.min(3.1,b.sx/3)}));
+    }
   });
 
   // Service elevations get realistic closed garage/roller doors;
@@ -324,23 +342,39 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     placeNearCity(scene,"factory-door",68,-107.35,{height:2.85}),
     placeNearCity(scene,"real-shutter",63.5,-107.35,{height:2.48}),
     placeNearCity(scene,"urban-door",149,-95.35,{height:2.62}),
-    placeNearCity(scene,"bike-rack",118,-37.4,{height:0.86,yaw:Math.PI/2}),
-    placeNearCity(scene,"bike-rack",166,-124.2,{height:0.86}),
-    placeNearCity(scene,"bike-rack",65.8,-32.3,{height:0.86}),
+    placeNearCity(scene,"bike-rack",118,-35.3,{height:0.86}),
+    placeNearCity(scene,"bike-rack",164,-118.5,{height:0.86}),
+    placeNearCity(scene,"bike-rack",63.8,-32.4,{height:0.86}),
     placeNearCity(scene,"real-trashbag",169,-118.8,{height:0.48}),
     placeNearCity(scene,"real-trashbag",59,-32.7,{height:0.52}),
-    placeNearCity(scene,"real-coffee-cart",84,-11.35,{height:1.85,yaw:Math.PI}),
-    placeNearCity(scene,"real-chalkboard",84.8,-12.7,{height:1.25,yaw:-0.24}),
+    placeNearCity(scene,"real-coffee-cart",85.5,-8.7,{height:1.85,yaw:Math.PI}),
+    placeNearCity(scene,"real-chalkboard",87.6,-9.0,{height:1.25,yaw:-0.24}),
     placeNearCity(scene,"real-aircon",122,-57,{height:1.15,y:29.4}),
     placeNearCity(scene,"real-aircon",148,-57,{height:1.12,y:31.4}),
     placeNearCity(scene,"real-chainlink",60,-115.8,{height:2.0}),
     placeNearCity(scene,"city-bus",178,-132.2,{length:8.7,yaw:0}),
   );
   streetColliders.push(
-    {minX:117.3,maxX:118.7,minZ:-37.9,maxZ:-36.9},
-    {minX:165.3,maxX:166.7,minZ:-124.5,maxZ:-123.9},
-    {minX:65.3,maxX:66.3,minZ:-32.65,maxZ:-31.95},
-    {minX:82.8,maxX:85.2,minZ:-12.1,maxZ:-10.4},
+    {minX:117.05,maxX:118.95,minZ:-35.75,maxZ:-34.85}, // bike rack near gym
+    {minX:163.05,maxX:164.95,minZ:-118.95,maxZ:-118.05}, // bike rack by station
+    {minX:62.85,maxX:64.75,minZ:-32.85,maxZ:-31.95}, // bike rack near park
+    {minX:84.25,maxX:86.75,minZ:-9.4,maxZ:-8.0}, // food cart
+    {minX:87.12,maxX:88.08,minZ:-9.5,maxZ:-8.5}, // menu board
+    {minX:139.3,maxX:141.3,minZ:-80.1,maxZ:-75.9}, // historic bus shelter
+    {minX:109.45,maxX:110.55,minZ:-35.5,maxZ:-35.0}, // older bench
+    {minX:105.3,maxX:106.7,minZ:-35.5,maxZ:-35.0}, // recycling station
+    {minX:45.4,maxX:47.6,minZ:-14.35,maxZ:-13.65}, // older city trash cans
+    {minX:101.6,maxX:103.8,minZ:-35.55,maxZ:-34.85}, // Civic trash cans
+    {minX:139.3,maxX:141.5,minZ:-72.35,maxZ:-71.65}, // Downtown trash cans
+    {minX:180.9,maxX:183.1,minZ:-123.85,maxZ:-123.15}, // Station trash cans
+    {minX:181.05,maxX:182.95,minZ:-116.05,maxZ:-111.95}, // second bus shelter
+    {minX:65.75,maxX:66.25,minZ:-33.6,maxZ:-32.4}, // Old Town bench
+    {minX:144.75,maxX:145.25,minZ:-79.8,maxZ:-78.6}, // Downtown bench
+    {minX:139.75,maxX:141.25,minZ:-81.25,maxZ:-80.75}, // information board
+    {minX:180.5,maxX:181.5,minZ:-119.3,maxZ:-118.7}, // wayfinding pole
+    {minX:134.3,maxX:135.7,minZ:-80.4,maxZ:-79.6}, // recycling station
+    {minX:48.45,maxX:49.55,minZ:-14.35,maxZ:-13.65}, // west roadside lamp
+    {minX:129.0,maxX:129.9,minZ:-14.35,maxZ:-13.65}, // east roadside lamp
     // Parked bus and gated service fencing should not be walk-through geometry.
     {minX:176.8,maxX:179.2,minZ:-136.6,maxZ:-127.8},
     {minX:59,maxX:61,minZ:-116.02,maxZ:-115.58},

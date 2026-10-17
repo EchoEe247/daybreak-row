@@ -191,6 +191,11 @@ export function placeRealisticProp(scene: THREE.Scene, kind: EnvironmentProp, x:
   if(skipProps) return () => {};
   let alive=true;
   const anchor = new THREE.Group();
+  anchor.name = "prop:" + kind;
+  // Scene-inspection data is useful for ALL props, old and new, but does not
+  // affect their placement or game logic.
+  anchor.userData.placement = { kind, x, y: cfg.y ?? 0, z, yaw: cfg.yaw ?? 0,
+    targetHeight: cfg.height ?? null, targetLength: cfg.length ?? null };
   anchor.position.set(x,cfg.y??0,z);
   scene.add(anchor);
   // Defer detailed GLTF parsing until after the first playable frame.

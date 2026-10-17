@@ -298,6 +298,16 @@ export function buildWorld(scene: THREE.Scene): World {
   sign("CHO'S MARKET", marketB.door, 3.05, marketB.zFront - 0.2, Math.PI);
   sign("NORTHLINE", officeB.door, 3.3, officeB.zFront + 0.16);
 
+  // Colliders are based on existing model world bounds, not generic placeholders.
+  colliders.street.push(
+    {minX:0.90,maxX:2.10,minZ:12.19,maxZ:12.81}, // harbor bench
+    {minX:11.0,maxX:12.2,minZ:15.40,maxZ:16.0},
+    {minX:-1.1,maxX:1.1,minZ:13.05,maxZ:13.75}, // grouped metal cans
+    {minX:-16.1,maxX:-13.9,minZ:5.45,maxZ:6.15},
+    {minX:-6.35,maxX:-5.65,minZ:5.4,maxZ:6.0}, // daytime street lamps
+    {minX:17.65,maxX:18.35,minZ:5.4,maxZ:6.0},
+  );
+
   // Fixed daytime city: use only a few high-detail CC0 street lamp visuals.
   // Omit the old geometric poles, blocky heads and inactive nighttime point lights.
 
@@ -364,11 +374,10 @@ export function buildWorld(scene: THREE.Scene): World {
     placeRealisticProp(scene,"painted_wooden_nightstand",2.85,425.7,{height:0.56}),
     placeRealisticProp(scene,"WoodenTable_01",-2.35,524.1,{height:0.74}),
     placeRealisticProp(scene,"WoodenTable_01",2.3,524.3,{height:0.74}),
-    placeRealisticProp(scene,"WoodenTable_01",0,525.5,{height:0.74}),
-    placeRealisticProp(scene,"Sofa_01",2.65,727.0,{height:0.88}),
+    placeRealisticProp(scene,"Sofa_01",-2.8,726.5,{height:0.88}),
     placeRealisticProp(scene,"WoodenTable_01",-2.9,824.7,{height:0.72}),
     placeRealisticProp(scene,"painted_wooden_nightstand",2.8,826.4,{height:0.72}),
-    placeRealisticProp(scene,"metal_trash_can",3.0,825.6,{height:0.9}),
+    placeRealisticProp(scene,"metal_trash_can",2.5,823.5,{height:0.9}),
     placeRealisticProp(scene,"metal_trash_can",-4.2,926.5,{height:0.9}),
   ];
   // Preserve the original lamp-light positions while replacing their simple meshes.
@@ -501,7 +510,8 @@ export function buildWorld(scene: THREE.Scene): World {
   // Shelf cuboids are replaced by properly scaled licensed 3D shop shelving.
   // Their original colliders stay in place and protect the same aisles.
   woods.add(1.7, 0.85, 624.9, 3.4, 1.15, 626.2);
-  colliders.market.push({ minX: -3.4, maxX: -1.2, minZ: 621.6, maxZ: 624.4 });
+  colliders.market.push({ minX: -2.84, maxX: -1.96, minZ: 622.77, maxZ: 623.23 });
+  colliders.market.push({ minX: 0.44, maxX: 1.28, minZ: 622.42, maxZ: 622.88 });
   colliders.market.push({ minX: 1.7, maxX: 3.4, minZ: 624.9, maxZ: 626.2 });
 
   const office = rooms.office;
@@ -596,10 +606,15 @@ export function buildWorld(scene: THREE.Scene): World {
   // glass counter while keeping walkable aisles to both activities and the exit.
   const bookshop = rooms.bookshop;
   furnishRoom("bookshop",0,1120,bookshop.x0,bookshop.x1,bookshop.z0,bookshop.z1);
-  for(const x of [-3.95,-2.6,2.45,3.9]){
-    // Same original safe collision footprint, but shelves are now 3D models.
-    colliders.bookshop.push({minX:x-0.48,maxX:x+0.48,minZ:1120.9,maxZ:1122.58});
-  }
+  // Collision footprints now match the GLB shelves instead of the old
+  // oversized decorative box racks (which created invisible walls).
+  colliders.bookshop.push(
+    {minX:-4.62,maxX:-3.28,minZ:1121.54,maxZ:1122.06},
+    {minX:-3.10,maxX:-2.10,minZ:1121.62,maxZ:1121.94},
+    {minX:1.78,maxX:3.12,minZ:1121.54,maxZ:1122.06},
+    {minX:3.73,maxX:4.07,minZ:1121.27,maxZ:1122.29},
+    {minX:-0.73,maxX:-0.27,minZ:1120.55,maxZ:1121.65},
+  );
   woods.add(-1.05,0.67,1122.1,0.35,0.85,1122.65);
   woods.add(2.2,0.36,1124.2,4.15,0.62,1125.1);
   colliders.bookshop.push({minX:2.2,maxX:4.15,minZ:1124.2,maxZ:1125.1});
@@ -639,9 +654,10 @@ export function buildWorld(scene: THREE.Scene): World {
   // 1.3m interaction ranges stay walkable.
   const laundry = rooms.laundry;
   furnishRoom("laundry",0,1220,laundry.x0,laundry.x1,laundry.z0,laundry.z1);
-  for(const [x,z,w] of [[-3.45,1221.6,1.05],[-1.9,1221.6,1.05],[2.1,1221.6,1.05],[3.55,1221.6,1.05]]){
-    colliders.laundry.push({minX:x-w/2,maxX:x+w/2,minZ:z-0.55,maxZ:z+0.56});
+  for(const [x,z,w,depth] of [[-3.45,1221.6,1.12,1.12],[-1.9,1221.6,1.12,1.12],[2.1,1221.6,0.7,0.75],[3.55,1221.6,0.7,0.75]]){
+    colliders.laundry.push({minX:x-w/2,maxX:x+w/2,minZ:z-depth/2,maxZ:z+depth/2});
   }
+  colliders.laundry.push({minX:-4.04,maxX:-3.16,minZ:1224.05,maxZ:1224.35});
   woods.add(-4.4,0.62,1225.9,-2.8,0.84,1226.55);
   colliders.laundry.push({minX:-4.4,maxX:-2.8,minZ:1225.9,maxZ:1226.55});
   premiumPropDisposers.push(
@@ -651,6 +667,26 @@ export function buildWorld(scene: THREE.Scene): World {
     placeRoomProp("laundry","stacked-washer-dryer",3.55,1221.6,{height:1.74}),
     placeRoomProp("laundry","real-shelf",-3.6,1224.2,{height:1.6}),
   );
+
+  // Room-wide furniture collision audit: align invisible walk blockers with
+  // the actual old+new models; leave safe center aisles and door triggers open.
+  colliders.home.push(
+    {minX:1.65,maxX:3.36,minZ:420.65,maxZ:422.55}, // kitchen cabinetry
+    {minX:-3.16,maxX:-0.84,minZ:421.70,maxZ:422.80}, // sofa
+    {minX:-1.25,maxX:0.90,minZ:423.38,maxZ:424.22}, // coffee table
+    {minX:2.57,maxX:3.13,minZ:425.43,maxZ:425.98}, // nightstand
+  );
+  colliders.cafe.push(
+    {minX:-3.61,maxX:-1.09,minZ:523.61,maxZ:524.59},
+    {minX:1.04,maxX:3.56,minZ:523.81,maxZ:524.79},
+  );
+  colliders.office.push({minX:-3.72,maxX:-1.88,minZ:726.09,maxZ:726.91});
+  colliders.bakery.push(
+    {minX:-4.13,maxX:-1.67,minZ:824.22,maxZ:825.18},
+    {minX:1.53,maxX:3.47,minZ:823.17,maxZ:823.83},
+    {minX:2.45,maxX:3.15,minZ:826.05,maxZ:826.75},
+  );
+  colliders.gym.push({minX:-5.17,maxX:-3.23,minZ:926.17,maxZ:926.83});
 
   // Two local residents reuse the existing, fully rigged licensed human models.
   // Their animation mixers tick only when the corresponding indoor venue is active.
