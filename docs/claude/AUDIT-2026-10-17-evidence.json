@@ -1,0 +1,1565 @@
+{
+  "auditDate": "2026-10-17",
+  "timeZone": "America/Chicago",
+  "repository": "EchoEe247/daybreak-row",
+  "baselineCommit": "577cf0b82dd8ceccdcbe6863306f6148405fe90e",
+  "scope": "Full game/development-workflow/repository audit, bounded; findings in adjacent Markdown report.",
+  "localRuntime": {
+    "node": "v24.18.0",
+    "platform": "android",
+    "arch": "arm64"
+  },
+  "checks": [
+    {
+      "name": "versions",
+      "command": [
+        "node",
+        "-p",
+        "JSON.stringify({node:process.version,platform:process.platform,arch:process.arch})"
+      ],
+      "exit": 0,
+      "seconds": 0.44
+    },
+    {
+      "name": "git-before",
+      "command": [
+        "git",
+        "status",
+        "--short",
+        "--branch"
+      ],
+      "exit": 0,
+      "seconds": 0.02
+    },
+    {
+      "name": "game",
+      "command": [
+        "npm",
+        "run",
+        "test:game"
+      ],
+      "exit": 0,
+      "seconds": 3.2
+    },
+    {
+      "name": "typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit": 0,
+      "seconds": 12.52
+    },
+    {
+      "name": "general",
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exit": 1,
+      "seconds": 5.97
+    },
+    {
+      "name": "lint",
+      "command": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit": 1,
+      "seconds": 12.32
+    },
+    {
+      "name": "auth",
+      "command": [
+        "npm",
+        "run",
+        "check:auth"
+      ],
+      "exit": 1,
+      "seconds": 2.59
+    },
+    {
+      "name": "build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit": 0,
+      "seconds": 18.84
+    },
+    {
+      "name": "audit",
+      "command": [
+        "npm",
+        "audit",
+        "--json",
+        "--fetch-retries=0",
+        "--fetch-timeout=20000"
+      ],
+      "exit": 0,
+      "seconds": 2.95
+    },
+    {
+      "name": "git-after",
+      "command": [
+        "git",
+        "status",
+        "--short",
+        "--branch"
+      ],
+      "exit": 0,
+      "seconds": 0.14
+    }
+  ],
+  "checkInterpretation": {
+    "game": {
+      "pass": 42,
+      "fail": 0
+    },
+    "generalScripts": {
+      "pass": 190,
+      "fail": 10,
+      "typescriptStageSkippedByAnd": true
+    },
+    "typescriptStageRunSeparately": {
+      "pass": 59,
+      "fail": 0
+    },
+    "lint": {
+      "errors": 2,
+      "locations": [
+        "src/game/human-assets.test.mjs:1",
+        "src/lib/app-data/client.server.ts:281"
+      ]
+    },
+    "authDefault": {
+      "port": 8080,
+      "exit": 1
+    },
+    "authCorrected": {
+      "port": 4186,
+      "exit": 0
+    },
+    "npmAudit": {
+      "reportedVulnerabilities": 0,
+      "notFullSecurityAttestation": true
+    },
+    "build": {
+      "pass": true,
+      "databaseUrlsRemovedFromChildEnvironment": true,
+      "engineMinifiedKB": 753.86,
+      "engineGzipKB": 201.43
+    }
+  },
+  "repo": {
+    "visibility": "public",
+    "mainProtected": false,
+    "rulesets": [],
+    "workflowRuns": 0,
+    "workflowFiles": 0,
+    "baselinePRs": 0,
+    "baselineIssues": 0,
+    "releases": 0,
+    "tags": 0,
+    "originalCodeLicense": "None declared; README explicitly documents this.",
+    "envProbe": {
+      "command": "git check-ignore --no-index .env .env.local .env.production",
+      "exit": 1,
+      "matched": []
+    },
+    "limitedSecretPatternScan": {
+      "matches": [],
+      "scope": "Tracked UTF-8 files below 1MB; common token/private-key patterns; no full Git history or entropy scan."
+    },
+    "cleanBeforeAndAfter": true
+  },
+  "payload": {
+    "publicFiles": 119,
+    "publicBytes": 50287619,
+    "humansBytes": 8516014,
+    "environmentBytes": 41347923,
+    "notInitialTransfer": true
+  },
+  "reproductions": {
+    "invalidSave": {
+      "input": {
+        "version": 1,
+        "money": 186
+      },
+      "accepted": true,
+      "downstreamError": "Cannot read properties of undefined (reading 'slice')",
+      "browserConfirmed": true
+    },
+    "storageWriteFault": {
+      "injected": "QuotaExceededError",
+      "propagatedToCaller": false,
+      "browserConfirmed": true
+    },
+    "keyboardPause": {
+      "internalMode": "pause",
+      "visibleBody": "Monday · 7:14 AM\nDaybreak Row\n$204\nEnergy\nHunger\nHygiene\nSocial\nFun\nRun\nUse",
+      "resumeButtonAvailable": false,
+      "sourceCause": "tick changes mode without sync; periodic sync excludes pause/phone",
+      "caveat": "fixed-duration key samples were asynchronous; exact first/second key timing is not used as a toggle test"
+    },
+    "launcher": {
+      "mockService": "unrelated successful HTTP HEAD service on an isolated ephemeral localhost port",
+      "exit": 0,
+      "message": "Daybreak Row already running",
+      "actualGame": false
+    },
+    "bed": {
+      "atMinute": 720,
+      "energy": 53,
+      "label": "Sleep",
+      "resultSequence": "nap"
+    },
+    "work": {
+      "deskConsecutiveActivationsPay": 52,
+      "cityOfficeConsecutiveActivationsPay": 92,
+      "gameTimeAndNeedsConsumed": true,
+      "notProvenExploit": true
+    },
+    "collapseCooldown": {
+      "actualMinutesAfterCollapse": 0,
+      "engineComputedMinutesAfterCollapse": 1440
+    }
+  },
+  "browser": {
+    "commit": "577cf0b82dd8ceccdcbe6863306f6148405fe90e",
+    "renderer": "Chrome/149.0.7827.155; Mesa llvmpipe software WebGL; not physical phone gameplay GPU",
+    "privateContext": true,
+    "results": [
+      {
+        "name": "tab",
+        "targetId": "75334E0D8A56526EB6C1453D1C06F130"
+      },
+      {
+        "name": "started",
+        "position": {
+          "x": -10,
+          "z": 4.2
+        },
+        "input": {
+          "x": 0,
+          "y": 0,
+          "run": false,
+          "looking": false
+        },
+        "interaction": {
+          "promptId": null,
+          "promptKind": null,
+          "busyUntil": 0,
+          "elapsed": 1.0169000000000028,
+          "mode": "play",
+          "doorPhase": null
+        },
+        "render": {
+          "draws": 84,
+          "triangles": 263596,
+          "textures": 63,
+          "geometries": 71,
+          "sceneNodes": 308
+        },
+        "humans": {
+          "player": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": true
+          },
+          "mara": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "ellis": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "theo": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          },
+          "jun": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "idris": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          }
+        }
+      },
+      {
+        "name": "multitouch-hold",
+        "position": {
+          "x": -10.119476770434222,
+          "z": 4.032644259534815
+        },
+        "input": {
+          "x": 0,
+          "y": 0.8155187835420392,
+          "run": true,
+          "looking": false
+        },
+        "interaction": {
+          "promptId": null,
+          "promptKind": null,
+          "busyUntil": 0,
+          "elapsed": 1.266900000000002,
+          "mode": "play",
+          "doorPhase": null
+        },
+        "render": {
+          "draws": 84,
+          "triangles": 263596,
+          "textures": 63,
+          "geometries": 71,
+          "sceneNodes": 308
+        },
+        "humans": {
+          "player": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "mara": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "ellis": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "theo": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          },
+          "jun": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "idris": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          }
+        }
+      },
+      {
+        "name": "multitouch-release",
+        "position": {
+          "x": -10.285495491536768,
+          "z": 3.800095405893877
+        },
+        "input": {
+          "x": 0,
+          "y": 0,
+          "run": false,
+          "looking": false
+        },
+        "interaction": {
+          "promptId": null,
+          "promptKind": null,
+          "busyUntil": 0,
+          "elapsed": 1.3669000000000016,
+          "mode": "play",
+          "doorPhase": null
+        },
+        "render": {
+          "draws": 84,
+          "triangles": 263596,
+          "textures": 63,
+          "geometries": 71,
+          "sceneNodes": 308
+        },
+        "humans": {
+          "player": {
+            "status": "ready",
+            "motion": "run",
+            "visible": true
+          },
+          "mara": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "ellis": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "theo": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          },
+          "jun": {
+            "status": "ready",
+            "motion": "walk",
+            "visible": true
+          },
+          "idris": {
+            "status": "ready",
+            "motion": "idle",
+            "visible": false
+          }
+        }
+      },
+      {
+        "name": "camera-drag",
+        "yawBefore": 0.62,
+        "yawAfter": 0.18000000000000005,
+        "changed": true
+      },
+      {
+        "name": "escape-toggle",
+        "first": "play",
+        "second": "pause"
+      },
+      {
+        "name": "keyboard-ui",
+        "body": "Monday · 7:14 AM\n\nDaybreak Row\n\n$204\n\nEnergy\nHunger\nHygiene\nSocial\nFun\nRun\nUse"
+      },
+      {
+        "name": "store-fault-probes",
+        "storageFailureThrew": false,
+        "invalidAccepted": {
+          "version": 1,
+          "money": 186
+        }
+      },
+      {
+        "name": "door-home",
+        "entry": {
+          "position": {
+            "x": 1.35,
+            "z": 425.1
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 2.1169666666666673,
+            "elapsed": 2.367099999999999,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 50,
+            "triangles": 76482,
+            "textures": 80,
+            "geometries": 79,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": -22,
+            "z": -5.2
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 2.7337666666666642,
+            "elapsed": 2.7670999999999975,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 83,
+            "triangles": 255116,
+            "textures": 84,
+            "geometries": 82,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-cafe",
+        "entry": {
+          "position": {
+            "x": 0,
+            "z": 524
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 3.083766666666663,
+            "elapsed": 3.4004999999999965,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 56,
+            "triangles": 95629,
+            "textures": 90,
+            "geometries": 86,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": -6.4,
+            "z": -5.2
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 3.8171666666666617,
+            "elapsed": 3.850499999999995,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 88,
+            "triangles": 286202,
+            "textures": 90,
+            "geometries": 88,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-market",
+        "entry": {
+          "position": {
+            "x": -0.4,
+            "z": 624.6
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 4.1671666666666605,
+            "elapsed": 4.350499999999993,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 51,
+            "triangles": 91066,
+            "textures": 93,
+            "geometries": 90,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": -21,
+            "z": 5.2
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 4.767166666666658,
+            "elapsed": 4.8004999999999916,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 76,
+            "triangles": 239052,
+            "textures": 93,
+            "geometries": 90,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-office",
+        "entry": {
+          "position": {
+            "x": 0,
+            "z": 725.5
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 5.117166666666657,
+            "elapsed": 5.417399999999984,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 50,
+            "triangles": 82495,
+            "textures": 103,
+            "geometries": 95,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 8.2,
+            "z": -5.2
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 5.834066666666649,
+            "elapsed": 5.867399999999982,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 82,
+            "triangles": 240006,
+            "textures": 103,
+            "geometries": 98,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-bakery",
+        "entry": {
+          "position": {
+            "x": 0.6,
+            "z": 824.2
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": "bakery-attendant",
+            "promptKind": "act",
+            "busyUntil": 6.317466666666649,
+            "elapsed": 6.600799999999981,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 62,
+            "triangles": 112377,
+            "textures": 149,
+            "geometries": 125,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 82,
+            "z": -43.5
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 7.017466666666646,
+            "elapsed": 7.050799999999979,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 79,
+            "triangles": 281611,
+            "textures": 161,
+            "geometries": 130,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-gym",
+        "entry": {
+          "position": {
+            "x": 0.5,
+            "z": 925.4
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 7.367466666666645,
+            "elapsed": 7.5507999999999775,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 50,
+            "triangles": 82260,
+            "textures": 171,
+            "geometries": 137,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 122,
+            "z": -43.5
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 7.917466666666643,
+            "elapsed": 7.950799999999976,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 78,
+            "triangles": 288830,
+            "textures": 171,
+            "geometries": 137,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-cinema",
+        "entry": {
+          "position": {
+            "x": -0.5,
+            "z": 1025.1
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 8.367466666666662,
+            "elapsed": 8.68420000000002,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 48,
+            "triangles": 81596,
+            "textures": 194,
+            "geometries": 152,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 148,
+            "z": -43.5
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 9.100866666666708,
+            "elapsed": 9.134200000000043,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 79,
+            "triangles": 267066,
+            "textures": 194,
+            "geometries": 152,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-bookshop",
+        "entry": {
+          "position": {
+            "x": 0.6,
+            "z": 1124.8
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": "bookshop-owner",
+            "promptKind": "act",
+            "busyUntil": 9.450866666666725,
+            "elapsed": 9.584200000000065,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 57,
+            "triangles": 89266,
+            "textures": 206,
+            "geometries": 159,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 108,
+            "z": -98.4
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 10.000866666666752,
+            "elapsed": 10.034200000000087,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 111,
+            "triangles": 313990,
+            "textures": 213,
+            "geometries": 168,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "door-laundry",
+        "entry": {
+          "position": {
+            "x": 0.2,
+            "z": 1225.3
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 10.35086666666677,
+            "elapsed": 10.584200000000115,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 108,
+            "triangles": 189712,
+            "textures": 230,
+            "geometries": 181,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            }
+          }
+        },
+        "exit": {
+          "position": {
+            "x": 82,
+            "z": -84.5
+          },
+          "input": {
+            "x": 0,
+            "y": 0,
+            "run": false,
+            "looking": false
+          },
+          "interaction": {
+            "promptId": null,
+            "promptKind": null,
+            "busyUntil": 11.100866666666807,
+            "elapsed": 11.134200000000142,
+            "mode": "play",
+            "doorPhase": null
+          },
+          "render": {
+            "draws": 90,
+            "triangles": 301555,
+            "textures": 232,
+            "geometries": 183,
+            "sceneNodes": 308
+          },
+          "humans": {
+            "player": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": true
+            },
+            "mara": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "ellis": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "theo": {
+              "status": "ready",
+              "motion": "idle",
+              "visible": false
+            },
+            "jun": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            },
+            "idris": {
+              "status": "ready",
+              "motion": "walk",
+              "visible": true
+            }
+          }
+        }
+      },
+      {
+        "name": "phone-city",
+        "visible": true
+      },
+      {
+        "name": "reload-save",
+        "savedName": "Alex",
+        "savedPlace": "street",
+        "currentPlace": "street"
+      },
+      {
+        "name": "gpu",
+        "gl": {
+          "vendor": "Google Inc. (Mesa)",
+          "renderer": "ANGLE (Mesa, llvmpipe (LLVM 21.1.8 128 bits), OpenGL 4.6)"
+        }
+      }
+    ],
+    "errors": [],
+    "consoleErrors": [],
+    "failedRequests": [],
+    "complete": true,
+    "storage": "New isolated browser context; normal owner Chrome data not touched",
+    "testSetup": "QA hooks used for time, vitals, and door positioning. Real CDP touch dispatch and UI taps used for input/door activations. Audit runner only used process.platform shim for CDP Playwright connection.",
+    "screenshots": "Inspected internally; not included as deliverables."
+  },
+  "limitations": [
+    "No physical-device FPS/frame-time/memory/thermal/battery acceptance run.",
+    "No fresh npm ci install rerun.",
+    "No exhaustive spatial/camera/animation certification.",
+    "No full Git-history secret scan, penetration test, or independent verification of every upstream license.",
+    "No game implementation fixes applied."
+  ]
+}
