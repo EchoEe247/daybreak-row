@@ -11,8 +11,13 @@ let serial=0;const pending=new Map();
 ws.addEventListener("message",ev=>{const x=JSON.parse(ev.data);if(!pending.has(x.id))return;const h=pending.get(x.id);pending.delete(x.id);if(x.error)h.reject(x.error);else h.resolve(x.result);});
 const call=(method,params={})=>new Promise((resolve,reject)=>{const id=++serial;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params}));});
 const evalJs=async expression=>{const x=await call("Runtime.evaluate",{expression,returnByValue:true,awaitPromise:true});if(x.exceptionDetails)throw Error(JSON.stringify(x.exceptionDetails));return x.result.value;};
-if(!await evalJs("!!window.__controlsTest"))throw Error("Game QA hooks unavailable");
-await evalJs("(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.textContent?.trim()==='Start');if(b)b.click();return true;})()");
+let ready=false;
+for(let attempt=0;attempt<30;attempt++){
+  await evalJs("(()=>{const b=[...document.querySelectorAll('button')].find(x=>x.textContent?.trim()==='Start');if(b)b.click();return true;})()");
+  if(await evalJs("!!window.__controlsTest?.getActionsQA")){ready=true;break;}
+  await new Promise(r=>setTimeout(r,450));
+}
+if(!ready)throw Error("Game QA hooks unavailable after the startup budget");
 const roomData=await evalJs("(()=>{const q=window.__controlsTest;return {actions:q.getActionsQA(),colliders:q.getCollidersQA(),rooms:q.getRoomsQA()};})()");
 const RADIUS=.34;
 function reachable(room,area,actions,step=.22){
