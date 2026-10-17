@@ -2,18 +2,18 @@
 
 ## New activities
 
-Six new walk-to businesses in the connected city, all with physical storefront façades, street-side interaction markers, signs, and illustrated window displays:
+Six new businesses in the connected city, with street-facing façades, signage, and illustrated window displays. **Bakery and gym are now enterable** with dedicated interior interactions; the other four remain walk-up businesses:
 
 | Business | Coordinates (x,z) | Interaction | Outcome |
 |---|---|---|---|
-| Old Town Bakery | 82, -47 | Buy pastry ($7) | Hunger +27, fun +5, 16 minutes |
-| Civic Fitness | 122, -47 | Train ($12) | Fun +24, energy −17, hygiene −11, 65 minutes; needs energy |
+| Old Town Bakery | 82, -47 | Enter, buy pastry ($7), coffee ($3), meet baker | Hunger +27, fun +5, 16 minutes |
+| Civic Fitness | 122, -47 | Enter, train ($12), stretch, meet trainer | Fun +24, energy −17, hygiene −11, 65 minutes; needs energy |
 | Metro Cinema | 148, -47 | Watch movie ($16) | Fun +38, social +5, 98 minutes |
 | Fresh Spin Laundry | 82, -88 | Wash clothes ($6) | Hygiene +36, fun +3, 42 minutes |
 | Corner Books | 108, -102 | Browse/buy a book ($8) | Fun +21, social +6, 30 minutes |
 | Parcel Dispatch | 162, -101 | Delivery work (+$38) | Energy −20, hunger −9, 86 minutes, cooldown (230 minutes) |
 
-All activities advance simulated time, applying the standard decay and day-boundary logic. Costs are checked before payment and return a clear toast when insufficient. Parcel work is locked out until the recorded cooldown expires. No new interiors are implied; shop displays are closed windows and interactions remain on the public sidewalk.
+All activities advance simulated time, applying the standard decay and day-boundary logic. Costs are checked before payment and return a clear toast when insufficient. Parcel work is locked out until the recorded cooldown expires. Old Town Bakery and Civic Fitness now have dedicated rooms, enter/exit doors, their own collisions and camera-safe transitions, indoor activities, and locally animated human staff. Cinema, laundry, bookshop, and courier remain outdoor walk-up interactions; storefront glazing is decorative.
 
 ## Daily City Passport
 
@@ -34,3 +34,10 @@ Each in-game day, the phone's **City** tab shows three geographically marked des
 - Screenshot of Old Town Bakery visual window display inspected at a 360×740 mobile viewport. Physical Pixel FPS and touchscreen comfort remain user-verification items.
 
 Implementation intentionally prioritizes meaningful city gameplay over adding large photogrammetry models that would stress the Pixel.
+## Enterable interior upgrade (subsequent pass)
+
+- Bakery and gym rooms are separated from the main city geometry, like the original café and apartment. Both reuse the existing fade-out / camera snap / fade-in door pipeline, and offer safe exit positions 2.2m away from the entry interaction so the Use prompt does not re-trigger.
+- Interiors include bespoke furnishings and equipment, with selected locally bundled PBR props; one idle rigged human attendant or trainer appears only in their own active room.
+- The original City Passport now stamps the bakery after purchasing a pastry, and gym after completing a paid workout. Simply entering does not count.
+- All old v1 saves retain their format, with new place values supported by the existing indoor arrival reconciler. See `src/game/door-transition.test.mjs` and browser QA script `work/local-qa/daybreak/city-interiors-qa.js`.
+- No other businesses were changed to enterable status. Physical Android performance remains to be measured on-device.

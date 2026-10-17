@@ -37,6 +37,7 @@ declare global {
       getFun: () => number;
       setPositionForQA: ((x: number, z: number) => void) | undefined;
       setTimeForQA: ((minute: number) => void) | undefined;
+      restoreVitalsForQA: (() => void) | undefined;
       setSceneForQA: ((place: PlaceId, x: number, z: number) => void) | undefined;
       getSpeed: () => number;
       getPosition: () => { x: number; z: number };
@@ -463,6 +464,12 @@ export function mountGame(canvas: HTMLCanvasElement) {
     setTimeForQA: new URLSearchParams(window.location.search).has("touchqa") ? (minute) => {
       if (!play || !Number.isFinite(minute)) return;
       play.minute = Math.min(1439, Math.max(0, Math.floor(minute)));
+      sync(true);
+    } : undefined,
+    restoreVitalsForQA: new URLSearchParams(window.location.search).has("touchqa") ? () => {
+      if (!play) return;
+      for (const k of ["energy","hunger","hygiene","social","fun"] as const) play.needs[k] = 95;
+      play.collapseAt = -9999;
       sync(true);
     } : undefined,
     getSpeed: () => speed,

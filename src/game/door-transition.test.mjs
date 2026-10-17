@@ -3,9 +3,9 @@ import assert from "node:assert/strict";
 import { rooms, apt, cafeB, officeB, marketB } from "./layout.ts";
 import { parseDoorAction, doorTransitionLabel, reconcileIndoorArrival } from "./door-transition.ts";
 
-/** @type {readonly ["home","cafe","market","office"]} */
-const all=["home","cafe","market","office"];
-const exteriors={home:apt,cafe:cafeB,market:marketB,office:officeB};
+/** @type {readonly ["home","cafe","market","office","bakery","gym"]} */
+const all=["home","cafe","market","office","bakery","gym"];
+const exteriors={home:apt,cafe:cafeB,market:marketB,office:officeB,bakery:{door:82,zFront:-47},gym:{door:122,zFront:-47}};
 test("each building has recognized entry/exit, understandable labels and non-retriggering indoor spawn",()=>{
  for(const id of all){
   assert.deepEqual(parseDoorAction("enter-"+id),{direction:"enter",building:id});
@@ -18,9 +18,9 @@ test("each building has recognized entry/exit, understandable labels and non-ret
   assert.ok(room.spawn.x>room.x0+0.34 && room.spawn.x<room.x1-0.34);
   assert.ok(room.spawn.z>room.z0+0.34 && room.spawn.z<room.z1-0.34);
   assert.equal(room.exit.x, exteriors[id].door);
-  const exteriorDoorZ = exteriors[id].zFront + (id === "market" ? -1.3 : 1.25);
+  const exteriorDoorZ = id==="bakery"||id==="gym" ? -47 : exteriors[id].zFront + (id === "market" ? -1.3 : 1.25);
   assert.ok(Math.abs(room.exit.z - exteriorDoorZ) >= 1.45, `${id}: leaving can re-trigger entrance`);
-  assert.ok(Math.abs(room.exit.z-exteriors[id].zFront)>=2.5);
+  assert.ok(Math.abs(room.exit.z-exteriors[id].zFront)>= (id==="bakery"||id==="gym"?1.9:2.5));
  }
 });
 test("unknown interactions never get door transition",()=>{
@@ -39,4 +39,16 @@ test("existing safe position and outdoor progress are preserved",()=>{
  assert.equal(reconcileIndoorArrival(city),city);
  const inside={place:"office",x:2,z:724,money:83};
  assert.equal(reconcileIndoorArrival(inside),inside);
+});
+test("new city business arrivals stay in dedicated non-overlapping room coordinates",()=>{
+ const bakery=rooms.bakery,gym=rooms.gym;
+ assert.ok(bakery.z0>rooms.office.z1+40);
+ assert.ok(gym.z0>bakery.z1+40);
+ assert.equal(bakery.spawn.x,0.6);
+ assert.equal(gym.spawn.x,0.5);
+ assert.equal(parseDoorAction("enter-bakery")?.building,"bakery");
+ assert.equal(parseDoorAction("enter-gym")?.building,"gym");
+ assert.equal(parseDoorAction("city-bakery"),null);
+ assert.ok(Math.hypot(bakery.exit.x-82,bakery.exit.z+47)>1.5);
+ assert.ok(Math.hypot(gym.exit.x-122,gym.exit.z+47)>1.5);
 });

@@ -182,7 +182,7 @@ function pay(s: GameState, cost: number, notes: Note[]) {
   return true;
 }
 
-function enter(s: GameState, id: "home" | "cafe" | "market" | "office") {
+function enter(s: GameState, id: "home" | "cafe" | "market" | "office" | "bakery" | "gym") {
   const room = rooms[id];
   s.place = id;
   s.x = room.spawn.x;
@@ -190,7 +190,7 @@ function enter(s: GameState, id: "home" | "cafe" | "market" | "office") {
   s.yaw = room.spawn.yaw;
 }
 
-function exit(s: GameState, id: "home" | "cafe" | "market" | "office") {
+function exit(s: GameState, id: "home" | "cafe" | "market" | "office" | "bakery" | "gym") {
   const room = rooms[id];
   s.place = "street";
   s.x = room.exit.x;
@@ -217,6 +217,8 @@ export function buildActions(): Action[] {
   const cafe = rooms.cafe;
   const market = rooms.market;
   const office = rooms.office;
+  const bakery = rooms.bakery;
+  const gym = rooms.gym;
   const base: Action[] = [
     {
       id: "enter-home",
@@ -528,6 +530,125 @@ export function buildActions(): Action[] {
         return done(notes);
       },
     },
+    // New connected-city venues reuse the same collision-safe, faded doorway pipeline.
+    {
+      id: "enter-bakery",
+      place: "street",
+      x: 82, z: -47, r: 2.3,
+      label: () => "Enter Old Town Bakery",
+      run: (s) => { enter(s,"bakery"); return done([{caption:"Warm ovens, shelves of bread and the smell of something just baked."}],true); },
+    },
+    {
+      id: "exit-bakery",
+      place: "bakery",
+      x: bakery.door.x, z: bakery.door.z, r: 1.3,
+      label: () => "Leave Old Town Bakery",
+      run: (s) => { exit(s,"bakery"); return done([],true); },
+    },
+    {
+      id: "bakery-pastry",
+      place: "bakery",
+      x: -1.3, z: 822.55, r: 1.5,
+      label: () => "Fresh pastry · $7",
+      run: (s) => {
+        const notes:Note[]=[];
+        if (!pay(s,7,notes)) return done(notes);
+        const day=s.day;
+        s.needs.hunger=clamp(s.needs.hunger+27);
+        s.needs.fun=clamp(s.needs.fun+5);
+        notes.push(...advance(s,16,0.65));
+        notes.push({toast:"Fresh pastry · -$7",caption:"The paper bag is warm in your hands."});
+        if(s.day===day){const stamp=stampPassport(s,"bakery");if(stamp)notes.push({toast:stamp});}
+        return done(notes);
+      },
+    },
+    {
+      id: "bakery-attendant",
+      place: "bakery",
+      x: 0.1, z: 823.4, r: 1.1,
+      label: () => "Chat with the baker",
+      run: (s) => {
+        s.needs.social=clamp(s.needs.social+7);
+        s.needs.fun=clamp(s.needs.fun+3);
+        const notes=advance(s,9,0.6);
+        notes.push({caption:"Fresh dough takes time. So do good neighbors.",toast:"The baker recommends tomorrow's cinnamon rolls."});
+        return done(notes);
+      },
+    },
+    {
+      id: "bakery-coffee",
+      place: "bakery",
+      x: 2.2, z: 823.3, r: 1.3,
+      label: () => "Bakery coffee · $3",
+      run: (s) => {
+        const notes:Note[]=[];
+        if(!pay(s,3,notes))return done(notes);
+        s.needs.energy=clamp(s.needs.energy+10);
+        s.needs.social=clamp(s.needs.social+3);
+        notes.push(...advance(s,9,0.65));
+        notes.push({toast:"Bakery coffee · -$3",caption:"A quiet minute beside the window."});
+        return done(notes);
+      },
+    },
+    {
+      id: "enter-gym",
+      place: "street",
+      x: 122, z: -47, r: 2.3,
+      label: () => "Enter Civic Fitness",
+      run: (s) => { enter(s,"gym");return done([{caption:"Rubber floors, steel equipment and bright daylight."}],true); },
+    },
+    {
+      id: "exit-gym",
+      place: "gym",
+      x: gym.door.x,z: gym.door.z,r:1.3,
+      label: () => "Leave Civic Fitness",
+      run: (s) => { exit(s,"gym");return done([],true); },
+    },
+    {
+      id: "gym-workout",
+      place: "gym",
+      x: -2.25, z: 922.5, r: 1.6,
+      label: () => "Strength workout · $12",
+      run: (s) => {
+        if(s.needs.energy<19)return done([{toast:"Too exhausted to train. Rest first."}]);
+        const notes:Note[]=[];
+        if(!pay(s,12,notes))return done(notes);
+        const day=s.day;
+        s.needs.energy=clamp(s.needs.energy-17);
+        s.needs.hygiene=clamp(s.needs.hygiene-11);
+        s.needs.fun=clamp(s.needs.fun+24);
+        notes.push(...advance(s,65,0.9));
+        notes.push({toast:"Civic Fitness strength workout · -$12",caption:"One more rep, then a proper rest."});
+        if(s.day===day){const stamp=stampPassport(s,"gym");if(stamp)notes.push({toast:stamp});}
+        return done(notes);
+      },
+    },
+    {
+      id: "gym-trainer",
+      place: "gym",
+      x: 3.75, z: 925.4, r: 1.2,
+      label: () => "Ask the trainer",
+      run: (s) => {
+        s.needs.social=clamp(s.needs.social+6);
+        s.needs.fun=clamp(s.needs.fun+4);
+        const notes=advance(s,7,0.65);
+        notes.push({caption:"Form before weight. Consistency before speed.",toast:"Trainer: small sessions beat one heroic workout."});
+        return done(notes);
+      },
+    },
+    {
+      id: "gym-stretch",
+      place: "gym",
+      x: 2.45,z:925.0,r:1.6,
+      label: () => "Stretch & hydrate · free",
+      run: (s) => {
+        s.needs.energy=clamp(s.needs.energy+6);
+        s.needs.fun=clamp(s.needs.fun+5);
+        const notes=advance(s,12,0.6);
+        notes.push({toast:"Stretch complete",caption:"The tension in your shoulders finally eases."});
+        return done(notes);
+      },
+    },
     {
       id: "bench",
       place: "street",
@@ -560,7 +681,7 @@ export function buildActions(): Action[] {
       },
     },
   ];
-  const city: Action[] = CITY_SITES.map((site) => ({
+  const city: Action[] = CITY_SITES.filter(site=>site.id!=="bakery"&&site.id!=="gym").map((site) => ({
     id: "city-" + site.id,
     place: "street" as const,
     x: site.x,
@@ -608,22 +729,6 @@ export function buildActions(): Action[] {
         state.needs.hygiene = clamp(state.needs.hygiene + 12);
         notes.push({toast:"Community clinic visit. -$14",caption:"The city takes care of its people."});
         notes.push(...advance(state,32,0.5));
-      } else if (activity === "bakery") {
-        if (!pay(state,7,notes)) return done(notes);
-        successfulVisit = true;
-        state.needs.hunger = clamp(state.needs.hunger + 27);
-        state.needs.fun = clamp(state.needs.fun + 5);
-        notes.push(...advance(state,16,0.65));
-        notes.push({toast:"Fresh bread from Old Town Bakery · -$7",caption:"The paper bag is still warm."});
-      } else if (activity === "gym") {
-        if (!pay(state,12,notes)) return done(notes);
-        if (state.needs.energy < 19) { state.money += 12; return done([{toast:"You're too tired to train. Sleep first."}]); }
-        successfulVisit = true;
-        state.needs.energy = clamp(state.needs.energy - 17);
-        state.needs.hygiene = clamp(state.needs.hygiene - 11);
-        state.needs.fun = clamp(state.needs.fun + 24);
-        notes.push(...advance(state,65,0.9));
-        notes.push({toast:"Civic Fitness workout · -$12",caption:"Another lap. You'll feel it tomorrow."});
       } else if (activity === "cinema") {
         if (!pay(state,16,notes)) return done(notes);
         successfulVisit = true;

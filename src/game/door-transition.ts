@@ -5,12 +5,14 @@ export const DOOR_NAMES: Record<RoomId, string> = {
   cafe: "Harbor Cafe",
   market: "Cho's Market",
   office: "Northline Office",
+  bakery: "Old Town Bakery",
+  gym: "Civic Fitness",
 };
 
 export type DoorAction = { building: RoomId; direction: "enter" | "exit" };
 
 export function parseDoorAction(id: string): DoorAction | null {
-  const match = /^(enter|exit)-(home|cafe|market|office)$/.exec(id);
+  const match = /^(enter|exit)-(home|cafe|market|office|bakery|gym)$/.exec(id);
   if (!match) return null;
   return { direction: match[1] as DoorAction["direction"], building: match[2] as RoomId };
 }

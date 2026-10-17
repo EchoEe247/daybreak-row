@@ -74,6 +74,8 @@ export function buildWorld(scene: THREE.Scene): World {
     cafe: [],
     market: [],
     office: [],
+    bakery: [],
+    gym: [],
   };
   const disposables: { dispose: () => void }[] = [];
 
@@ -356,6 +358,10 @@ export function buildWorld(scene: THREE.Scene): World {
     placeRealisticProp(scene,"WoodenTable_01",2.3,524.3,{height:0.74}),
     placeRealisticProp(scene,"WoodenTable_01",0,525.5,{height:0.74}),
     placeRealisticProp(scene,"Sofa_01",2.65,727.0,{height:0.88}),
+    placeRealisticProp(scene,"WoodenTable_01",-2.9,824.7,{height:0.72}),
+    placeRealisticProp(scene,"painted_wooden_nightstand",2.8,826.4,{height:0.72}),
+    placeRealisticProp(scene,"metal_trash_can",3.0,825.6,{height:0.9}),
+    placeRealisticProp(scene,"metal_trash_can",-4.2,926.5,{height:0.9}),
   ];
   // Preserve the original lamp-light positions while replacing their simple meshes.
   for(const x of [-6,18]) {
@@ -499,6 +505,74 @@ export function buildWorld(scene: THREE.Scene): World {
   colliders.office.push({ minX: -3.4, maxX: -1.1, minZ: 721.6, maxZ: 723.3 });
   colliders.office.push({ minX: 2.5, maxX: 4.2, minZ: 726.5, maxZ: 727.7 });
 
+  // New city interiors occupy separated room coordinates. Keeping each interior
+  // independent from its exterior storefront preserves the existing collision
+  // and cross-building camera fade/snap, including legacy save compatibility.
+  const bakery = rooms.bakery;
+  furnishRoom("bakery",0,820,bakery.x0,bakery.x1,bakery.z0,bakery.z1);
+  // Working bakery: wooden display counter, 2 pastry shelves and a stainless oven.
+  woods.add(-3.6,0.35,820.85,1.45,1.16,821.72);
+  glasses.add(-3.6,1.17,821.01,1.45,1.78,821.63);
+  for(let i=0;i<5;i++) {
+    const x=-3.0+i*0.87;
+    woods.add(x,1.36,820.9,x+0.68,1.44,821.4);
+    woods.add(x,1.66,820.9,x+0.68,1.74,821.4);
+  }
+  metals.add(2.5,0.35,820.8,4.1,1.88,821.8);
+  glasses.add(2.65,0.95,821.66,3.95,1.64,821.76);
+  metals.add(2.45,1.82,821.65,4.15,1.89,821.82);
+  woods.add(3.5,0.6,824.8,4.05,1.0,826.9);
+  colliders.bakery.push({ minX:-3.6,maxX:1.45,minZ:820.85,maxZ:821.72 });
+  colliders.bakery.push({ minX:2.5,maxX:4.1,minZ:820.8,maxZ:821.8 });
+  colliders.bakery.push({ minX:3.5,maxX:4.05,minZ:824.8,maxZ:826.9 });
+
+  const gym = rooms.gym;
+  furnishRoom("gym",0,920,gym.x0,gym.x1,gym.z0,gym.z1);
+  // Padded exercise floor, a multi-bar weight rack and treadmill silhouettes.
+  const rubberFloor = new THREE.Mesh(
+    new THREE.PlaneGeometry(gym.x1-gym.x0-0.4,gym.z1-gym.z0-0.4),
+    new THREE.MeshStandardMaterial({color:0x30343a,roughness:0.98}),
+  );
+  rubberFloor.rotation.x=-Math.PI/2;
+  rubberFloor.position.set((gym.x0+gym.x1)/2,0.042,(gym.z0+gym.z1)/2);
+  scene.add(rubberFloor);
+  disposables.push(rubberFloor.geometry,rubberFloor.material as THREE.Material);
+  for(let i=0;i<4;i++){
+    const x=-4+i*0.75;
+    metals.add(x,0.65,920.78,x+0.15,1.7,921.02);
+    metals.add(x-0.04,1.63,920.7,x+0.27,1.7,921.17);
+  }
+  metals.add(-4,0.75,921.06,-1.32,0.84,921.23);
+  for(let i=0;i<3;i++){
+    const x=-3.55+i*0.9;
+    concretes.add(x-0.12,0.92,920.86,x+0.12,1.12,921.1);
+  }
+  woods.add(1.5,0.35,921.6,3.5,0.65,922.7);
+  metals.add(1.75,0.18,922.32,1.86,1.4,922.43);
+  metals.add(3.18,0.18,922.32,3.29,1.4,922.43);
+  metals.add(-3.7,0.09,925.1,-1.1,0.14,926.15);
+  glasses.add(-5.1,0.4,920.4,-5.03,2.4,928.0);
+  colliders.gym.push({minX:-4,maxX:-1.32,minZ:920.7,maxZ:921.28});
+  colliders.gym.push({minX:1.5,maxX:3.5,minZ:921.6,maxZ:922.7});
+
+  // Two local residents reuse the existing, fully rigged licensed human models.
+  // Their animation mixers tick only when the corresponding indoor venue is active.
+  const venueResidents: Array<{ place: PlaceId; rig: LoadedHuman }> = [];
+  let residentsDisposed=false;
+  for(const resident of [
+    {place:"bakery" as PlaceId, kind:"pedestrian-b" as const, x:-2.4,z:822.35,yaw:Math.PI},
+    {place:"gym" as PlaceId, kind:"pedestrian-a" as const,x:2.95,z:924.2,yaw:1.9},
+  ]) {
+    void loadRiggedHuman(resident.kind).then(rig=>{
+      if(residentsDisposed){rig.mixer.stopAllAction();return;}
+      rig.root.position.set(resident.x,0,resident.z);
+      rig.root.rotation.y=resident.yaw;
+      rig.root.visible=false;
+      scene.add(rig.root);
+      venueResidents.push({place:resident.place,rig});
+    }).catch(error=>console.warn("City venue character fallback:",error));
+  }
+
   function fabricsSoft(r: typeof home) {
     const rug = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 1.5), new THREE.MeshStandardMaterial({ color: 0x8d4a3c, roughness: 0.95 }));
     rug.rotation.x = -Math.PI / 2;
@@ -618,6 +692,11 @@ export function buildWorld(scene: THREE.Scene): World {
     (skyMat.uniforms.uSun.value as THREE.Vector3).set(skySample.sun.x, skySample.sun.y, skySample.sun.z);
     skyMat.uniforms.uStars.value = skySample.stars;
     realisticHarborTrees.setVisible(place === "street");
+    for(const resident of venueResidents){
+      const visible=resident.place===place;
+      resident.rig.root.visible=visible;
+      if(visible)resident.rig.mixer.update(dt);
+    }
     // Hide only the active interior ceiling for a clear room-aware, elevated camera.
     for (const entry of roomCeilings) entry.mesh.visible = entry.id !== place;
     const elev = skySample.elev;
@@ -689,6 +768,8 @@ export function buildWorld(scene: THREE.Scene): World {
     colliders,
     update,
     dispose: () => {
+      residentsDisposed=true;
+      for(const resident of venueResidents){resident.rig.mixer.stopAllAction();scene.remove(resident.rig.root);}
       realisticHarborTrees.dispose();
       premiumPropDisposers.forEach(dispose=>dispose());
       endPBR.forEach(dispose=>dispose());

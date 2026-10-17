@@ -107,6 +107,10 @@ export function placeLabel(place: string) {
       return "Cho's Market";
     case "office":
       return "Northline Office";
+    case "bakery":
+      return "Old Town Bakery";
+    case "gym":
+      return "Civic Fitness";
     default:
       return "Daybreak Row";
   }
