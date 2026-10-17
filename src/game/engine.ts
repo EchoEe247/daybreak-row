@@ -40,6 +40,7 @@ declare global {
       getSpeed: () => number;
       getPosition: () => { x: number; z: number };
       getHumanQA: () => Record<string, { status: string; motion: string; visible: boolean }>;
+      getRenderQA: () => { draws: number; triangles: number; textures: number; geometries: number; sceneNodes: number };
       getPlace: () => PlaceId;
       getCameraPosition: () => { x: number; y: number; z: number };
       getTransition: () => { label: string | null; veil: number };
@@ -122,7 +123,7 @@ function camClip(px: number, pz: number, tx: number, tz: number, boxes: Collider
 }
 
 export function mountGame(canvas: HTMLCanvasElement) {
-  const coarse = window.matchMedia("(pointer: coarse)").matches;
+  const coarse = window.matchMedia("(pointer: coarse)").matches || new URLSearchParams(window.location.search).has("mobile-qa");
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !coarse, powerPreference: "high-performance" });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -463,6 +464,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       }
       return stats;
     },
+    getRenderQA: () => ({ draws: renderer.info.render.calls, triangles: renderer.info.render.triangles, textures: renderer.info.memory.textures, geometries: renderer.info.memory.geometries, sceneNodes: scene.children.length }),
     getPlace: () => sim().place,
     getCameraPosition: () => ({ x: camera.position.x, y: camera.position.y, z: camera.position.z }),
     getTransition: () => ({ label: useUi.getState().transitionLabel, veil: useUi.getState().veil }),

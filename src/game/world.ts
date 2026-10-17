@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { buildCity } from "@/game/city-world";
+import { applyRealisticSurface, placeRealisticProp, replaceVisualVehicle } from "@/game/environment-assets";
 import { loadRiggedHuman, type LoadedHuman } from "@/game/human-assets";
 import { apt, cafeB, marketB, officeB, pier, rooms } from "@/game/layout";
 import type { PlaceId } from "@/game/types";
@@ -168,6 +169,14 @@ export function buildWorld(scene: THREE.Scene): World {
     roughness: 0.35,
   });
 
+  const endPBR = [
+    applyRealisticSurface(grassMat,"grass_path_2",14,12),
+    applyRealisticSurface(roadMat,"aerial_asphalt_01",10,3),
+    applyRealisticSurface(walkMat,"concrete_floor_02",10,3),
+    applyRealisticSurface(floorMat,"wood_planks",3,3),
+    applyRealisticSurface(brick,"red_brick_03",5,4),
+    applyRealisticSurface(concrete,"concrete_floor_02",3,3),
+  ];
   const mats = [
     grassMat, roadMat, walkMat, floorMat, plasterMat, brick, stucco, stuccoCool, wood, roof,
     concrete, metal, leaf, leaf2, trunk, fabricCafe, fabricMarket, glassMat, waterMat, glowMat, lampMat,
@@ -327,25 +336,44 @@ export function buildWorld(scene: THREE.Scene): World {
   scene.add(fountainWater);
   colliders.street.push({ minX: 4.2, maxX: 6.6, minZ: 13.2, maxZ: 15.4 });
 
-  woods.add(0.5, 0.42, 12.3, 2.4, 0.55, 12.7);
   metals.add(0.7, 0.2, 12.15, 0.82, 0.45, 12.28);
   metals.add(2.05, 0.2, 12.15, 2.18, 0.45, 12.28);
-  woods.add(10.6, 0.42, 15.5, 12.6, 0.55, 15.95);
 
   colliders.street.push({ minX: -40, maxX: 2.05, minZ: 20.35, maxZ: 21.15 });
   colliders.street.push({ minX: 6.7, maxX: 42, minZ: 20.35, maxZ: 21.15 });
   concretes.add(-36, 0.15, 20.35, 2.05, 0.55, 21.05);
   concretes.add(6.7, 0.15, 20.35, 38, 0.55, 21.05);
 
+  // PBR scanned props occupy the original interaction/collision positions.
+  const premiumPropDisposers = [
+    placeRealisticProp(scene,"painted_wooden_bench",1.5,12.5,{height:0.82,yaw:Math.PI}),
+    placeRealisticProp(scene,"painted_wooden_bench",11.6,15.7,{height:0.82}),
+    placeRealisticProp(scene,"metal_trash_can",0,13.4,{height:1.05}),
+    placeRealisticProp(scene,"metal_trash_can",-15,5.8,{height:1.02}),
+    placeRealisticProp(scene,"sofa_02",-2,422.25,{height:0.87}),
+    placeRealisticProp(scene,"WoodenTable_01",-0.18,423.8,{height:0.62}),
+    placeRealisticProp(scene,"painted_wooden_nightstand",2.85,425.7,{height:0.56}),
+    placeRealisticProp(scene,"WoodenTable_01",-2.35,524.1,{height:0.74}),
+    placeRealisticProp(scene,"WoodenTable_01",2.3,524.3,{height:0.74}),
+    placeRealisticProp(scene,"WoodenTable_01",0,525.5,{height:0.74}),
+    placeRealisticProp(scene,"Sofa_01",2.65,727.0,{height:0.88}),
+  ];
+  // Preserve the original lamp-light positions while replacing their simple meshes.
+  for(const x of [-28,-6,18]) for(const z of [-5.6,5.7]) {
+    premiumPropDisposers.push(placeRealisticProp(scene,"street_lamp_01",x,z,{height:3.55}));
+  }
+
   const parkedA = makeCar(0xc4553a);
   parkedA.position.set(-8.5, 0, 1.55);
   parkedA.rotation.y = Math.PI / 2;
   scene.add(parkedA);
+  const paintedSedan = replaceVisualVehicle(parkedA,"red-sedan",4.35);
   colliders.street.push({ minX: -10.7, maxX: -6.3, minZ: 0.7, maxZ: 2.5 });
   const parkedB = makeCar(0x2c3f55);
   parkedB.position.set(14.2, 0, -1.45);
   parkedB.rotation.y = -Math.PI / 2;
   scene.add(parkedB);
+  const parkedSedan = replaceVisualVehicle(parkedB,"realistic-sedan",4.1);
   colliders.street.push({ minX: 12, maxX: 16.4, minZ: -2.35, maxZ: -0.55 });
 
   const driver = makeCar(0xe6d3a8);
@@ -356,6 +384,7 @@ export function buildWorld(scene: THREE.Scene): World {
   headL.position.set(0.55, 0.55, 1.95);
   headR.position.set(-0.55, 0.55, 1.95);
   driver.add(headL, headR);
+  const trafficSedan = replaceVisualVehicle(driver,"realistic-sedan",4.1);
 
   const waterGeo = new THREE.PlaneGeometry(96, 42, 36, 16);
   const water = new THREE.Mesh(waterGeo, waterMat);
@@ -442,21 +471,16 @@ export function buildWorld(scene: THREE.Scene): World {
 
   const home = rooms.home;
   furnishRoom("home", 0, 420, home.x0, home.x1, home.z0, home.z1);
-  woods.add(-2.9, 0.28, 421.15, -1.15, 0.55, 423.15);
   concretes.add(1.7, 0, 420.7, 3.3, 2.1, 422.5);
   glasses.add(1.85, 0.4, 420.85, 3.15, 2.0, 422.35);
   woods.add(1.7, 0.9, 423.1, 3.25, 1.05, 424.15);
   metals.add(2.55, 0.2, 423.2, 3.15, 1.5, 424.0);
   woods.add(-3.15, 0.72, 424.1, -1.55, 0.78, 425.15);
-  woods.add(-1.1, 0.32, 423.15, 0.85, 0.62, 424.45);
   fabricsSoft(home);
 
   const cafe = rooms.cafe;
   furnishRoom("cafe", 0, 520, cafe.x0, cafe.x1, cafe.z0, cafe.z1);
   woods.add(-2.4, 0.9, 520.7, 2.6, 1.15, 521.7);
-  woods.add(-3.1, 0.42, 523.4, -1.5, 0.5, 524.7);
-  woods.add(1.5, 0.42, 523.6, 3.2, 0.5, 525);
-  woods.add(-0.8, 0.42, 524.8, 0.9, 0.5, 526);
   colliders.cafe.push({ minX: -2.4, maxX: 2.6, minZ: 520.7, maxZ: 521.7 });
 
   const market = rooms.market;
@@ -666,6 +690,11 @@ export function buildWorld(scene: THREE.Scene): World {
     colliders,
     update,
     dispose: () => {
+      premiumPropDisposers.forEach(dispose=>dispose());
+      endPBR.forEach(dispose=>dispose());
+      paintedSedan.dispose();
+      parkedSedan.dispose();
+      trafficSedan.dispose();
       city.dispose();
       citizen.dispose();
       for (const d of disposables) d.dispose();

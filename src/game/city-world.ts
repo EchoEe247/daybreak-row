@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { AVENUES, CROSS_STREETS, CITY_STOPS, CITY_SITES } from "./city-layout";
 import type { Collider } from "./world";
 import { loadRiggedHuman, type LoadedHuman, type HumanKind } from "./human-assets";
+import { applyRealisticSurface, placeRealisticProp, createRealisticTraffic } from "./environment-assets";
 
 /** Lightweight, fully connected outdoor city; one batched draw per material. */
 export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
@@ -29,18 +30,27 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     };
   }
   const palette=[0xc5ae97,0x8b6258,0xb1bdc6,0xd7d0bd,0x6d7d90,0xb9987e,0x8da3aa,0x665f65];
-  const walls=palette.map(c=>new THREE.MeshLambertMaterial({color:c}));
+  const walls=palette.map(c=>new THREE.MeshStandardMaterial({color:c,roughness:0.9}));
   const dark=new THREE.MeshLambertMaterial({color:0x252b36});
   const glass=new THREE.MeshStandardMaterial({color:0x688ba0,roughness:0.22,metalness:0.3,emissive:0xffd29b,emissiveIntensity:0});
-  const concrete=new THREE.MeshLambertMaterial({color:0xbcb6ad});
+  const concrete=new THREE.MeshStandardMaterial({color:0xbcb6ad});
   const lanePaint=new THREE.MeshBasicMaterial({color:0xe5dab3});
   const metal=new THREE.MeshLambertMaterial({color:0x535d69});
   const leaf=new THREE.MeshLambertMaterial({color:0x52775b});
   const wood=new THREE.MeshLambertMaterial({color:0x745947});
-  const park=new THREE.MeshLambertMaterial({color:0x66885d});
+  const park=new THREE.MeshStandardMaterial({color:0x66885d});
   const roofMat=new THREE.MeshLambertMaterial({color:0x373f4b});
-  const roadMat=new THREE.MeshLambertMaterial({color:0x4b5059});
+  const roadMat=new THREE.MeshStandardMaterial({color:0x4b5059});
   const trafficColors=[0xc16d53,0xe1d9c4,0x4e8791,0x354156,0xc09b58].map(color=>new THREE.MeshLambertMaterial({color}));
+  const pbrDisposers = [
+    applyRealisticSurface(roadMat,"aerial_asphalt_01",9,9),
+    applyRealisticSurface(concrete,"concrete_floor_02",7,7),
+    applyRealisticSurface(park,"grass_path_2",10,10),
+    applyRealisticSurface(walls[0],"red_brick_03",4,3,{tint:0xd7c2ae}),
+    applyRealisticSurface(walls[2],"concrete_floor_02",4,5,{tint:0xcbd7da}),
+    applyRealisticSurface(walls[4],"concrete_floor_02",4,5,{tint:0xa9c1d7}),
+    applyRealisticSurface(walls[5],"red_brick_03",4,4,{tint:0xe1c7ad}),
+  ];
   const mats=[...walls,dark,glass,concrete,lanePaint,metal,leaf,wood,park,roofMat,roadMat,...trafficColors];
   owned.push(...mats);
   const mass=walls.map(mat=>batch(mat,130));
@@ -217,6 +227,30 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     metalBits.add(site.x,1.1,site.z,0.12,1.65,0.12);
   }
 
+  const cityProps = [
+    placeRealisticProp(scene,"painted_wooden_bench",66,-33,{height:0.8,yaw:Math.PI/2}),
+    placeRealisticProp(scene,"painted_wooden_bench",110,-34,{height:0.8}),
+    placeRealisticProp(scene,"painted_wooden_bench",145,-81,{height:0.8,yaw:Math.PI/2}),
+    placeRealisticProp(scene,"metal_trash_can",52,-14,{height:1.03}),
+    placeRealisticProp(scene,"metal_trash_can",95,-42,{height:1.03}),
+    placeRealisticProp(scene,"metal_trash_can",138,-80,{height:1.03}),
+    placeRealisticProp(scene,"metal_trash_can",179,-121,{height:1.03}),
+  ];
+
+  // CC0 vehicle meshes replace the placeholder boxes after loading, without changing paths/collision.
+  type RealTraffic = Awaited<ReturnType<typeof createRealisticTraffic>>;
+  const mobileAssetBudget = window.matchMedia("(pointer: coarse)").matches || new URLSearchParams(window.location.search).has("mobile-qa");
+  const detailedCarCount = mobileAssetBudget ? 4 : 8;
+  let realTraffic: RealTraffic | null = null;
+  let releasedTraffic=false;
+  // Wait for the first scene frame before parsing and cloning vehicle assets.
+  const trafficTimer = window.setTimeout(()=>{
+    void createRealisticTraffic(scene,detailedCarCount).then(result=>{
+      if(releasedTraffic){result.dispose();return;}
+      realTraffic=result;
+    }).catch(error=>console.warn("Real traffic fallback",error));
+  },1600);
+
   // 3-part traffic instances. Cars travel on the actual road centerlines; no vehicle collider.
   const carGeo=boxGeo;
   const trafficBody=trafficColors.map(mat=>new THREE.InstancedMesh(carGeo,mat,12));
@@ -259,11 +293,14 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     update(dt:number, elapsed:number, night:number, focus:THREE.Vector3, outdoor:boolean) {
       glass.emissiveIntensity=night*0.85;
       // Hide animated city life while the player is indoors; reduce unnecessary instance churn.
-      for(const m of [...trafficBody,cabinTraffic])m.visible=outdoor;
+      const legacyCars = outdoor && !realTraffic;
+      for(const m of [...trafficBody,cabinTraffic])m.visible=legacyCars;
+      if(realTraffic)for(const car of realTraffic.cars)car.visible=false;
       if(!outdoor) { for (const walker of cityPedestrians) if(walker) walker.group.visible=false; return; }
       const counters=trafficColors.map(()=>0);
       let cab=0;
       for(let i=0;i<traffic.length;i++){
+        if(realTraffic && i>=detailedCarCount) continue;
         const car=traffic[i];
         const phase=(car.phase+elapsed*car.speed/255)%1;
         const track=car.lane%2===0;
@@ -272,6 +309,13 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
         const near=Math.hypot(xx-focus.x,zz-focus.z)<100;
         if(!near)continue;
         const rot=track?Math.PI/2:0;
+        if(realTraffic) {
+          const view=realTraffic.cars[i];
+          view.visible=true;
+          view.position.set(xx,0,zz);
+          view.rotation.y=rot;
+          continue;
+        }
         const style=car.style;
         const idx=counters[style]++;
         setInstance(trafficBody[style],idx,xx,0.58,zz,1.6,0.46,3.3,rot);
@@ -295,6 +339,11 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
       void dt;
     },
     dispose() {
+      releasedTraffic=true;
+      window.clearTimeout(trafficTimer);
+      realTraffic?.dispose();
+      pbrDisposers.forEach(dispose=>dispose());
+      cityProps.forEach(dispose=>dispose());
       for(const b of all)b.mesh.dispose();
       released=true;
       for(const walker of cityPedestrians) if(walker){walker.rig.mixer.stopAllAction();scene.remove(walker.group);}

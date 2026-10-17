@@ -1,0 +1,31 @@
+{
+  "assets": [
+    {
+      "bytes": 641680,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/realistic-sedan.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T00:42:50.065500Z",
+      "sha256": "4cb896f740de4da871c1d87c4af2b734db3d1e8fac852e308f1fca03a63b25d3",
+      "source_url": "https://www.innerscene.com/api/library/sedan-car-42109739/download",
+      "title": "Unbranded Sedan Car GLB",
+      "unpacked": false
+    },
+    {
+      "bytes": 5058464,
+      "creator": "Innerscene original",
+      "destination": "/data/data/com.termux/files/home/MainWorkspace/daybreak-row/public/environment/models/red-sedan.glb",
+      "expanded_bytes": null,
+      "extracted_to": null,
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-17T00:42:59.763764Z",
+      "sha256": "fd7c909da90361a49db41e7ee944b2bc0c47fba247fad11480b76b8a712b51bf",
+      "source_url": "https://www.innerscene.com/api/library/red-four-door-sedan-1d32e180/download",
+      "title": "Red Four Door Sedan",
+      "unpacked": false
+    }
+  ],
+  "version": 1
+}

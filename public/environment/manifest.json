@@ -1,0 +1,586 @@
+{
+  "creator": "Poly Haven",
+  "catalog": "https://polyhaven.com",
+  "license": "CC0-1.0",
+  "resolution": "1K (phone-friendly)",
+  "assets": [
+    {
+      "id": "painted_wooden_bench",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/painted_wooden_bench",
+      "polyhavenApi": "https://api.polyhaven.com/files/painted_wooden_bench",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/painted_wooden_bench/painted_wooden_bench.gltf"
+    },
+    {
+      "id": "sofa_02",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/sofa_02",
+      "polyhavenApi": "https://api.polyhaven.com/files/sofa_02",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/sofa_02/sofa_02.gltf"
+    },
+    {
+      "id": "WoodenTable_01",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/WoodenTable_01",
+      "polyhavenApi": "https://api.polyhaven.com/files/WoodenTable_01",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/WoodenTable_01/WoodenTable_01.gltf"
+    },
+    {
+      "id": "metal_trash_can",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/metal_trash_can",
+      "polyhavenApi": "https://api.polyhaven.com/files/metal_trash_can",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/metal_trash_can/metal_trash_can.gltf"
+    },
+    {
+      "id": "street_lamp_01",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/street_lamp_01",
+      "polyhavenApi": "https://api.polyhaven.com/files/street_lamp_01",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/street_lamp_01/street_lamp_01.gltf"
+    },
+    {
+      "id": "Sofa_01",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/Sofa_01",
+      "polyhavenApi": "https://api.polyhaven.com/files/Sofa_01",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/Sofa_01/Sofa_01.gltf"
+    },
+    {
+      "id": "painted_wooden_nightstand",
+      "kind": "model",
+      "page": "https://polyhaven.com/a/painted_wooden_nightstand",
+      "polyhavenApi": "https://api.polyhaven.com/files/painted_wooden_nightstand",
+      "license": "CC0-1.0",
+      "gltf": "public/environment/models/painted_wooden_nightstand/painted_wooden_nightstand.gltf"
+    },
+    {
+      "id": "asphalt_03",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/asphalt_03",
+      "polyhavenApi": "https://api.polyhaven.com/files/asphalt_03",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/asphalt_03_color.jpg",
+        "normal": "/environment/textures/asphalt_03_normal.jpg",
+        "roughness": "/environment/textures/asphalt_03_roughness.jpg"
+      }
+    },
+    {
+      "id": "concrete_floor_02",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/concrete_floor_02",
+      "polyhavenApi": "https://api.polyhaven.com/files/concrete_floor_02",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/concrete_floor_02_color.jpg",
+        "normal": "/environment/textures/concrete_floor_02_normal.jpg",
+        "roughness": "/environment/textures/concrete_floor_02_roughness.jpg"
+      }
+    },
+    {
+      "id": "red_brick_03",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/red_brick_03",
+      "polyhavenApi": "https://api.polyhaven.com/files/red_brick_03",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/red_brick_03_color.jpg",
+        "normal": "/environment/textures/red_brick_03_normal.jpg",
+        "roughness": "/environment/textures/red_brick_03_roughness.jpg"
+      }
+    },
+    {
+      "id": "wood_planks",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/wood_planks",
+      "polyhavenApi": "https://api.polyhaven.com/files/wood_planks",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/wood_planks_color.jpg",
+        "normal": "/environment/textures/wood_planks_normal.jpg",
+        "roughness": "/environment/textures/wood_planks_roughness.jpg"
+      }
+    },
+    {
+      "id": "grass_path_2",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/grass_path_2",
+      "polyhavenApi": "https://api.polyhaven.com/files/grass_path_2",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/grass_path_2_color.jpg",
+        "normal": "/environment/textures/grass_path_2_normal.jpg",
+        "roughness": "/environment/textures/grass_path_2_roughness.jpg"
+      }
+    },
+    {
+      "id": "aerial_asphalt_01",
+      "kind": "texture",
+      "page": "https://polyhaven.com/a/aerial_asphalt_01",
+      "polyhavenApi": "https://api.polyhaven.com/files/aerial_asphalt_01",
+      "license": "CC0-1.0",
+      "maps": {
+        "color": "/environment/textures/aerial_asphalt_01_color.jpg",
+        "normal": "/environment/textures/aerial_asphalt_01_normal.jpg",
+        "roughness": "/environment/textures/aerial_asphalt_01_roughness.jpg"
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "public/environment/models/painted_wooden_bench/painted_wooden_bench.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/painted_wooden_bench/painted_wooden_bench_1k.gltf",
+      "asset": "painted_wooden_bench",
+      "usage": "model",
+      "bytes": 2835,
+      "sha256": "2289ab82f3fe3045bf18f7b9541743d2c65b9f071cb34bbe424d2bc998f3e507"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_bench/textures/painted_wooden_bench_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_bench/painted_wooden_bench_diff_1k.jpg",
+      "asset": "painted_wooden_bench",
+      "usage": "model-dependency",
+      "bytes": 545216,
+      "sha256": "9bc533313091ee71eaca5fa6334b71d27935d9d75311f64df6a53c28a67c435c"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_bench/textures/painted_wooden_bench_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_bench/painted_wooden_bench_nor_gl_1k.jpg",
+      "asset": "painted_wooden_bench",
+      "usage": "model-dependency",
+      "bytes": 830104,
+      "sha256": "a0f53740d77fc61aac01de0b7e1ae6109445d1756839f739ae31fdf10c9911f2"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_bench/textures/painted_wooden_bench_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_bench/painted_wooden_bench_arm_1k.jpg",
+      "asset": "painted_wooden_bench",
+      "usage": "model-dependency",
+      "bytes": 586040,
+      "sha256": "878785565eeff706b8f1e4db7e3d794a544e9cf0e56cee424d9a271ab4ead47e"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_bench/painted_wooden_bench.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/painted_wooden_bench/painted_wooden_bench.bin",
+      "asset": "painted_wooden_bench",
+      "usage": "model-dependency",
+      "bytes": 25444,
+      "sha256": "5799bcb20924105cccd6424de8cdb8e67eb57fddc19c395befeac634a7b2e013"
+    },
+    {
+      "path": "public/environment/models/sofa_02/sofa_02.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/sofa_02/sofa_02_1k.gltf",
+      "asset": "sofa_02",
+      "usage": "model",
+      "bytes": 4183,
+      "sha256": "5df114209f9b956ccd4831eaeef469a81339ab371d0056eb6d5d29eee08eb431"
+    },
+    {
+      "path": "public/environment/models/sofa_02/textures/sofa_02_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_diff_1k.jpg",
+      "asset": "sofa_02",
+      "usage": "model-dependency",
+      "bytes": 86514,
+      "sha256": "4ff65c782578b52eee89cb96cc4e258ce1b6848e1a7655019af1f7207c749840"
+    },
+    {
+      "path": "public/environment/models/sofa_02/textures/sofa_02_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_arm_1k.jpg",
+      "asset": "sofa_02",
+      "usage": "model-dependency",
+      "bytes": 121752,
+      "sha256": "f2813f32cd9ec42a9080590d0953ac9e272d9baa0b22fdb5910bf325157393c6"
+    },
+    {
+      "path": "public/environment/models/sofa_02/textures/sofa_02_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_nor_gl_1k.jpg",
+      "asset": "sofa_02",
+      "usage": "model-dependency",
+      "bytes": 139858,
+      "sha256": "c97a359703a8ce1cee62cbd9dc4013b611d821afb7769810983b464ebc5d0cfe"
+    },
+    {
+      "path": "public/environment/models/sofa_02/sofa_02.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/sofa_02/sofa_02.bin",
+      "asset": "sofa_02",
+      "usage": "model-dependency",
+      "bytes": 74864,
+      "sha256": "cb337e03211be0309afa1ded2b6cbb2d402c0f794aaf8828fba559d27a42d3f5"
+    },
+    {
+      "path": "public/environment/models/WoodenTable_01/WoodenTable_01.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/WoodenTable_01/WoodenTable_01_1k.gltf",
+      "asset": "WoodenTable_01",
+      "usage": "model",
+      "bytes": 2688,
+      "sha256": "413804e054055c397b4cfbd0916027097d2a20853b165b533007a46d131e1d17"
+    },
+    {
+      "path": "public/environment/models/WoodenTable_01/WoodenTable_01.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/WoodenTable_01/WoodenTable_01.bin",
+      "asset": "WoodenTable_01",
+      "usage": "model-dependency",
+      "bytes": 42064,
+      "sha256": "1083a3442969d27e18e6a7a454bc164407439e3908bf8f17f5fb24d58cd0172e"
+    },
+    {
+      "path": "public/environment/models/WoodenTable_01/textures/WoodenTable_01_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_nor_gl_1k.jpg",
+      "asset": "WoodenTable_01",
+      "usage": "model-dependency",
+      "bytes": 151350,
+      "sha256": "330655534ea1fc7c7387b5d2ba5ca3231711a9fa680b980933a3a9c82cdb1c67"
+    },
+    {
+      "path": "public/environment/models/WoodenTable_01/textures/WoodenTable_01_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_diff_1k.jpg",
+      "asset": "WoodenTable_01",
+      "usage": "model-dependency",
+      "bytes": 160147,
+      "sha256": "9535de577ad6b64deb68457af14240dd9b6d82143da0b6d2bf337660ebd855f3"
+    },
+    {
+      "path": "public/environment/models/WoodenTable_01/textures/WoodenTable_01_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/WoodenTable_01/WoodenTable_01_arm_1k.jpg",
+      "asset": "WoodenTable_01",
+      "usage": "model-dependency",
+      "bytes": 198099,
+      "sha256": "ad876f814215006d35f74670d4fc14a9f6eab386a9307764521449464a1cd6ef"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/metal_trash_can.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_trash_can/metal_trash_can_1k.gltf",
+      "asset": "metal_trash_can",
+      "usage": "model",
+      "bytes": 15481,
+      "sha256": "ccdc55ecfe43db2174c9257891e92551882a874564bb9a7908cafc5268b46c0c"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_diff_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 551939,
+      "sha256": "920c895a31b1cd2c000123c0592c70c33d46562752987da98070e7e0eebb662f"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_rust_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_diff_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 768161,
+      "sha256": "51c44248305b111d978f7e0cbfe4a71ab7f49549968ce37c54b635d74c2cfba1"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_arm_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 731776,
+      "sha256": "b23dcdb2ed40c1c6cfbd2d2779c6f075025b7269bfbbed2a70c6bdb7167e47fb"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_rust_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_nor_gl_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 1085844,
+      "sha256": "a5497588e00e5e56db72e701457fc8a46d3a1fa7d9dd7bf9d79e02cada09e84b"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_nor_gl_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 842945,
+      "sha256": "b977f17aa9d4718ffc91a62868b7171b4479578b8cffd1d32001d92552af81a4"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/metal_trash_can.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_trash_can/metal_trash_can.bin",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 378288,
+      "sha256": "a9b9f526b655bef865933335f2cfc8c8f0bd1a35fda05b290a93e3061f2b6c8a"
+    },
+    {
+      "path": "public/environment/models/metal_trash_can/textures/metal_trash_can_rust_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_trash_can/metal_trash_can_rust_arm_1k.jpg",
+      "asset": "metal_trash_can",
+      "usage": "model-dependency",
+      "bytes": 620549,
+      "sha256": "31a6269e98a3a8b2a2d6db8f58724e0151d5312b5137e6d59b5a2ba873989159"
+    },
+    {
+      "path": "public/environment/models/street_lamp_01/street_lamp_01.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/street_lamp_01/street_lamp_01_1k.gltf",
+      "asset": "street_lamp_01",
+      "usage": "model",
+      "bytes": 6419,
+      "sha256": "5d0358ede168b5e04547780b99d8e6d651cbe644e468e67cb505019047cbd5c8"
+    },
+    {
+      "path": "public/environment/models/street_lamp_01/textures/street_lamp_01_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_arm_1k.jpg",
+      "asset": "street_lamp_01",
+      "usage": "model-dependency",
+      "bytes": 664324,
+      "sha256": "4b5487a6c7ee300c3cf5449629e01c35409e5c7ac1695edb9fe69d4821853c7c"
+    },
+    {
+      "path": "public/environment/models/street_lamp_01/textures/street_lamp_01_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_diff_1k.jpg",
+      "asset": "street_lamp_01",
+      "usage": "model-dependency",
+      "bytes": 307889,
+      "sha256": "3e9d3471b33eb1f8075ed741c2b1932103598626d057ca12ef38005ea5fcb165"
+    },
+    {
+      "path": "public/environment/models/street_lamp_01/textures/street_lamp_01_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/street_lamp_01/street_lamp_01_nor_gl_1k.jpg",
+      "asset": "street_lamp_01",
+      "usage": "model-dependency",
+      "bytes": 438623,
+      "sha256": "172af0fd7ed4999e9f520b9f56e1f357a6dba87adbd7b8aa87e0a0b95840c63d"
+    },
+    {
+      "path": "public/environment/models/street_lamp_01/street_lamp_01.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/street_lamp_01/street_lamp_01.bin",
+      "asset": "street_lamp_01",
+      "usage": "model-dependency",
+      "bytes": 748908,
+      "sha256": "c283db9b6d95835d9e8fc1692829acadcb21a0623b2daaa7231cec1440488401"
+    },
+    {
+      "path": "public/environment/models/Sofa_01/Sofa_01.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Sofa_01/Sofa_01_1k.gltf",
+      "asset": "Sofa_01",
+      "usage": "model",
+      "bytes": 2636,
+      "sha256": "dc9d331a24fc8994606ae5a283826cb28feb3166782f59d006d0f10cc92cc830"
+    },
+    {
+      "path": "public/environment/models/Sofa_01/textures/Sofa_01_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_diff_1k.jpg",
+      "asset": "Sofa_01",
+      "usage": "model-dependency",
+      "bytes": 134925,
+      "sha256": "1772047e7887a9ec44878e0720eda0829abfa744dec6ca03b492a31c4dc51cab"
+    },
+    {
+      "path": "public/environment/models/Sofa_01/textures/Sofa_01_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_nor_gl_1k.jpg",
+      "asset": "Sofa_01",
+      "usage": "model-dependency",
+      "bytes": 154517,
+      "sha256": "1d89009f9fba3b6967d63cb718606b3049d2423bc031da12ee228718a0571e84"
+    },
+    {
+      "path": "public/environment/models/Sofa_01/Sofa_01.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Sofa_01/Sofa_01.bin",
+      "asset": "Sofa_01",
+      "usage": "model-dependency",
+      "bytes": 111264,
+      "sha256": "c8af86de6db09a6d49703e0e51cf8acafa23fb2ee945e66a48225dced3a154e1"
+    },
+    {
+      "path": "public/environment/models/Sofa_01/textures/Sofa_01_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_arm_1k.jpg",
+      "asset": "Sofa_01",
+      "usage": "model-dependency",
+      "bytes": 114593,
+      "sha256": "fc5db69e4cf5cf9f881b2d134fae69c4e3b1a96378f131752ef48060bf0c5e39"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_nightstand/painted_wooden_nightstand.gltf",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/painted_wooden_nightstand/painted_wooden_nightstand_1k.gltf",
+      "asset": "painted_wooden_nightstand",
+      "usage": "model",
+      "bytes": 4427,
+      "sha256": "fbdc51ee41f2ee2dc7c455cd6f8321ff14e80c7a7d1e7736b194ca0b3e48b304"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_nightstand/textures/painted_wooden_nightstand_nor_gl_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_nightstand/painted_wooden_nightstand_nor_gl_1k.jpg",
+      "asset": "painted_wooden_nightstand",
+      "usage": "model-dependency",
+      "bytes": 751707,
+      "sha256": "2d7574ce96c1202bc37ad49fd219a2f918028e102a6d1743714bc90032295c15"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_nightstand/painted_wooden_nightstand.bin",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/painted_wooden_nightstand/painted_wooden_nightstand.bin",
+      "asset": "painted_wooden_nightstand",
+      "usage": "model-dependency",
+      "bytes": 18916,
+      "sha256": "67b0834c6d0337bd144a1f72045bfe4de029618766b344fa9ffc4c3fc3ee8865"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_nightstand/textures/painted_wooden_nightstand_arm_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_nightstand/painted_wooden_nightstand_arm_1k.jpg",
+      "asset": "painted_wooden_nightstand",
+      "usage": "model-dependency",
+      "bytes": 773123,
+      "sha256": "c3724c444d74f5b0e65904de0633bfe99db76f8c9b9211703aeeab62b02031ef"
+    },
+    {
+      "path": "public/environment/models/painted_wooden_nightstand/textures/painted_wooden_nightstand_diff_1k.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/painted_wooden_nightstand/painted_wooden_nightstand_diff_1k.jpg",
+      "asset": "painted_wooden_nightstand",
+      "usage": "model-dependency",
+      "bytes": 603334,
+      "sha256": "bf7447441b2f78c847d7c4cda8b80e604853e2b559ffe03b41c0e4b3bff8ed9f"
+    },
+    {
+      "path": "public/environment/textures/asphalt_03_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_diff_1k.jpg",
+      "asset": "asphalt_03",
+      "usage": "texture-color",
+      "bytes": 788840,
+      "sha256": "95ad02e2631c41cf9fdd6a37596cf75adb4fb8a8b6880567cc78ed1c41dc5681"
+    },
+    {
+      "path": "public/environment/textures/asphalt_03_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_nor_gl_1k.jpg",
+      "asset": "asphalt_03",
+      "usage": "texture-normal",
+      "bytes": 974676,
+      "sha256": "978de8349ce2e9989325099a6fd1f5ea6b2826528e1264606a5c51296b1e2888"
+    },
+    {
+      "path": "public/environment/textures/asphalt_03_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/asphalt_03/asphalt_03_rough_1k.jpg",
+      "asset": "asphalt_03",
+      "usage": "texture-roughness",
+      "bytes": 590105,
+      "sha256": "069b6ea342aaad04fd1582f59c16fbbe5c7a6f0f3a87bc9d57648ed53336fb3a"
+    },
+    {
+      "path": "public/environment/textures/concrete_floor_02_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_diff_1k.jpg",
+      "asset": "concrete_floor_02",
+      "usage": "texture-color",
+      "bytes": 776097,
+      "sha256": "6db84a6d87dc50508b9d134d6fbd2b7e876b8081a5f43a118a249ca18de73af5"
+    },
+    {
+      "path": "public/environment/textures/concrete_floor_02_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_nor_gl_1k.jpg",
+      "asset": "concrete_floor_02",
+      "usage": "texture-normal",
+      "bytes": 192757,
+      "sha256": "fcda391b57a816d646ae15544688be53790478da5cd48dbe514b3c6901415e61"
+    },
+    {
+      "path": "public/environment/textures/concrete_floor_02_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_02/concrete_floor_02_rough_1k.jpg",
+      "asset": "concrete_floor_02",
+      "usage": "texture-roughness",
+      "bytes": 318550,
+      "sha256": "c7f026a611b7859903c61ec7fd4574944157223e9e7796413dd6e2a66eaeac7a"
+    },
+    {
+      "path": "public/environment/textures/red_brick_03_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/red_brick_03/red_brick_03_diff_1k.jpg",
+      "asset": "red_brick_03",
+      "usage": "texture-color",
+      "bytes": 694500,
+      "sha256": "9c58254c099b2d211478f50a427fcdde622af24249ff2e94da41fb836f8c857f"
+    },
+    {
+      "path": "public/environment/textures/red_brick_03_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/red_brick_03/red_brick_03_nor_gl_1k.jpg",
+      "asset": "red_brick_03",
+      "usage": "texture-normal",
+      "bytes": 955430,
+      "sha256": "9bfd45e24720d851017c1e1678b70219c72239b2ac6b25e11d57d458bdab8503"
+    },
+    {
+      "path": "public/environment/textures/red_brick_03_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/red_brick_03/red_brick_03_rough_1k.jpg",
+      "asset": "red_brick_03",
+      "usage": "texture-roughness",
+      "bytes": 286623,
+      "sha256": "cd865623c1422926848024e877103e9dfe857b2ca8221fce49264b74c9ff48b1"
+    },
+    {
+      "path": "public/environment/textures/wood_planks_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks/wood_planks_diff_1k.jpg",
+      "asset": "wood_planks",
+      "usage": "texture-color",
+      "bytes": 609525,
+      "sha256": "3b0669f683e4bf10f5a55a381cfa9669a7b8dfd921901829daa3b35acc2bbdec"
+    },
+    {
+      "path": "public/environment/textures/wood_planks_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks/wood_planks_nor_gl_1k.jpg",
+      "asset": "wood_planks",
+      "usage": "texture-normal",
+      "bytes": 652441,
+      "sha256": "d02abf113e17a8abe97e1be3e9d6d88add242e8c2291e2200d37aa8c68909f25"
+    },
+    {
+      "path": "public/environment/textures/wood_planks_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks/wood_planks_rough_1k.jpg",
+      "asset": "wood_planks",
+      "usage": "texture-roughness",
+      "bytes": 299757,
+      "sha256": "1b7f115bfa25619b0a2db554eb1ab88a6fc5ef0b74ba4890611eae04d00b9829"
+    },
+    {
+      "path": "public/environment/textures/grass_path_2_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_diff_1k.jpg",
+      "asset": "grass_path_2",
+      "usage": "texture-color",
+      "bytes": 716010,
+      "sha256": "7f30b163739435c11f500f3818c7bb4922bab5f2734cc9ba6dd36817f0c9a8ab"
+    },
+    {
+      "path": "public/environment/textures/grass_path_2_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_nor_gl_1k.jpg",
+      "asset": "grass_path_2",
+      "usage": "texture-normal",
+      "bytes": 831959,
+      "sha256": "4f6e911619d4c79a6bc340a64eac1e5fcbae8e54ea2674ed1892f6a9a1dfb5fa"
+    },
+    {
+      "path": "public/environment/textures/grass_path_2_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_rough_1k.jpg",
+      "asset": "grass_path_2",
+      "usage": "texture-roughness",
+      "bytes": 335245,
+      "sha256": "2aaf4400e7892d643a4f64d7347f2a0ca65051b5cb0c1b5d0ef383a65a5fa172"
+    },
+    {
+      "path": "public/environment/textures/aerial_asphalt_01_color.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_diff_1k.jpg",
+      "asset": "aerial_asphalt_01",
+      "usage": "texture-color",
+      "bytes": 635143,
+      "sha256": "28bfd71288b364f825e0feb750e487410422d80bf3c31d32da01cae3bf085b58"
+    },
+    {
+      "path": "public/environment/textures/aerial_asphalt_01_normal.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_nor_gl_1k.jpg",
+      "asset": "aerial_asphalt_01",
+      "usage": "texture-normal",
+      "bytes": 560227,
+      "sha256": "7a58cb4460f75b66359b8e19bc92585554a79c2b0009e2b9e21eccac0a58d3f6"
+    },
+    {
+      "path": "public/environment/textures/aerial_asphalt_01_roughness.jpg",
+      "source": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/aerial_asphalt_01/aerial_asphalt_01_rough_1k.jpg",
+      "asset": "aerial_asphalt_01",
+      "usage": "texture-roughness",
+      "bytes": 312445,
+      "sha256": "19ca745417e36a1cd1114411801933b3144a351d1409d0d9caa1046b9a20c0ec"
+    }
+  ]
+}

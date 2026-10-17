@@ -22,7 +22,8 @@
     "test:mobile-controls": "node --experimental-strip-types --test src/game/virtual-stick.test.mjs",
     "test:city": "node --experimental-strip-types --test src/game/city-layout.test.mjs src/game/virtual-stick.test.mjs",
     "test:doors": "node --experimental-strip-types --test src/game/door-transition.test.mjs",
-    "test:humans": "node --experimental-strip-types --test src/game/human-assets.test.mjs"
+    "test:humans": "node --experimental-strip-types --test src/game/human-assets.test.mjs",
+    "test:environment": "node --experimental-strip-types --test src/game/environment-assets.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/city-layout.test.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",
