@@ -1,6 +1,6 @@
 # Claude handoff — Daybreak Row
 
-This file is the entry point for Claude or another repository-only research assistant. **This task is research and planning, not implementation.** Do not change game code, installed assets, save schema, or configurations unless the owner separately requests it.
+This file is the entry point for Claude or another repository-only research assistant. The owner's current runtime is Termux on a Pixel 6a. **This task is research and planning, not implementation.** Do not change game code, installed assets, save schema, or configurations unless the owner separately requests it.
 
 ## Read in this order
 1. `README.md` — game overview and navigation.

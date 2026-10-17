@@ -69,11 +69,12 @@ npm ci
 npm run dev
 ```
 
-The default development server runs at **http://localhost:8080/**. The Android-specific `start-local.sh` instead selects port **4186**.
+The default development server is loopback-only at **http://localhost:8080/**. The Android-specific `start-local.sh` uses **4186**, verifies the game's identity, and rejects unrelated services already using the port. The inherited Grok remote extension is disabled by default during dev/build; set `VITE_GROK_EXTENSIONS=1` only if deliberately required.
 
 Other useful commands:
 
 ```sh
+npm run test:all          # Aggregate supported checks (CI gate)
 npm run test:game         # Gameplay, city, interiors, controls, and assets
 npm run test:mobile-controls
 npm run typecheck
@@ -81,7 +82,7 @@ npm run build
 npm run lint
 ```
 
-**Validation snapshot (October 17, 2026):** 42/42 gameplay and asset tests, typecheck, and production build pass. The broader `npm test` script has existing scaffold/PWA branding fixture failures and `npm run lint` reports two existing findings. See [Runtime and QA](docs/handoff/RUNTIME-AND-QA.md) before interpreting results.
+**Reliability update (October 17, 2026):** 48/48 gameplay and asset tests pass, including injected save-storage failure cases. General tests, lint, typecheck and build now pass. CI is configured under `.github/workflows/ci.yml`. See [QA guide](docs/qa/README.md) and [Runtime and QA](docs/handoff/RUNTIME-AND-QA.md).
 
 ## Tech and organization
 

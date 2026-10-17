@@ -110,7 +110,8 @@ function main(argv) {
     console.error("usage: node scripts/with-app-env.mjs <command> [args…]");
     process.exit(2);
   }
-  const env = mergeAppEnv(readAppEnv(projectRoot()), process.env);
+  // The Grok sandbox extension is an opt-in remote script, not a local game dependency.
+  const env = mergeAppEnv({ VITE_GROK_EXTENSIONS: "0", ...readAppEnv(projectRoot()) }, process.env);
   const child = spawn(command, args, { stdio: "inherit", env });
   // The dev server is long-running and is stopped by signalling this wrapper.
   for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"]) {

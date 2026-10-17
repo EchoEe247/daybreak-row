@@ -8,3 +8,9 @@ coverage/
 *.pid
 .DS_Store
 *.tsbuildinfo
+.env
+.env.*
+!.env.example
+!.env.sample
+
+__pycache__/

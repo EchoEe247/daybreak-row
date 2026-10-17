@@ -62,6 +62,7 @@ export type Toast = { id: number; text: string };
 
 export type UiState = {
   ready: boolean;
+  saveError: string | null;
   mode: Mode;
   hasSave: boolean;
   name: string;

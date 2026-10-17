@@ -1,5 +1,5 @@
 {
-  "name": "app-builder-workspace",
+  "name": "daybreak-row",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -7,7 +7,7 @@
     "nf3": "0.3.17"
   },
   "scripts": {
-    "dev": "node scripts/with-app-env.mjs vite dev --host 0.0.0.0 --port 8080",
+    "dev": "node scripts/with-app-env.mjs vite dev --host 127.0.0.1 --port 8080",
     "build": "node scripts/with-app-env.mjs vite build && npm run db:migrate",
     "db:migrate": "node scripts/migrate.mjs",
     "build:dev": "node scripts/with-app-env.mjs vite build --mode development",
@@ -19,14 +19,16 @@
     "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/app-data/app-data.test.ts src/lib/app-data/readiness-schedule.test.ts src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts src/lib/preview-path-prefix.test.ts",
     "lint": "eslint .",
     "format": "prettier --write .",
+    "test:all": "npm test && npm run test:game && npm run typecheck && npm run lint && npm run build",
+    "check:phone": "node scripts/check-auth-invariant.mjs --dev-url http://127.0.0.1:4186",
     "test:mobile-controls": "node --experimental-strip-types --test src/game/virtual-stick.test.mjs",
     "test:city": "node --experimental-strip-types --test src/game/city-layout.test.mjs src/game/virtual-stick.test.mjs",
     "test:doors": "node --experimental-strip-types --test src/game/door-transition.test.mjs",
-    "test:humans": "node --experimental-strip-types --test src/game/human-assets.test.mjs",
+    "test:humans": "node --experimental-strip-types --test scripts/human-assets.test.mjs",
     "test:environment": "node --experimental-strip-types --test src/game/environment-assets.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/city-layout.test.mjs",
     "test:daylight": "node --experimental-strip-types --test src/game/time-daylight.test.mjs",
     "test:streets": "node --experimental-strip-types --test src/game/street-assets.test.mjs src/game/environment-assets.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/city-layout.test.mjs",
-    "test:game": "node --experimental-strip-types --test src/game/npc-routines.test.mjs src/game/discovery.test.mjs src/game/city-passport.test.mjs src/game/city-layout.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/environment-assets.test.mjs src/game/street-assets.test.mjs src/game/time-daylight.test.mjs src/game/human-assets.test.mjs scripts/realism-assets.test.mjs"
+    "test:game": "node --experimental-strip-types --test src/game/npc-routines.test.mjs src/game/discovery.test.mjs src/game/city-passport.test.mjs src/game/city-layout.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/environment-assets.test.mjs src/game/street-assets.test.mjs src/game/time-daylight.test.mjs scripts/human-assets.test.mjs scripts/realism-assets.test.mjs scripts/qa/save-codec.test.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

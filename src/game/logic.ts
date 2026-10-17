@@ -11,6 +11,9 @@ const FIRST: GoalId[] = ["shower", "meal", "earn", "groceries", "talk", "sleep"]
 
 export type Note = { toast?: string; caption?: string; log?: string };
 
+export function canNap(s:GameState) {
+  return s.needs.energy>50 && hourOf(s.minute)>6 && hourOf(s.minute)<21;
+}
 export function clamp(n: number, a = 0, b = 100) {
   return Math.max(a, Math.min(b, n));
 }
@@ -262,9 +265,9 @@ export function buildActions(): Action[] {
       x: anchors.bed.x,
       z: anchors.bed.z,
       r: 1.35,
-      label: (s) => (s.needs.energy > 55 && hourOf(s.minute) < 21 && hourOf(s.minute) > 6 ? "Nap" : "Sleep"),
+      label: (s) => (canNap(s) ? "Nap" : "Sleep"),
       run: (s) => {
-        const nap = s.needs.energy > 50 && hourOf(s.minute) < 21 && hourOf(s.minute) > 6;
+        const nap = canNap(s);
         return done([], false, nap ? "nap" : "sleep");
       },
     },
@@ -335,7 +338,7 @@ export function buildActions(): Action[] {
         s.needs.fun = clamp(s.needs.fun - 4);
         s.needs.hunger = clamp(s.needs.hunger - 6);
         s.goals.earn = true;
-        s.freelanceAt = now + 70;
+        s.freelanceAt = now + 80 + 70;
         const notes = advance(s, 80);
         notes.push({ toast: "Freelance paid $26.", caption: "You invoice a small thing before it becomes a big one.", log: "Invoiced a small job. +$26." });
         if (notes[notes.length - 1].log) pushLog(s, notes[notes.length - 1].log!);
@@ -891,10 +894,10 @@ export function buildActions(): Action[] {
         notes.push(...advance(state,17,0.6));
       } else if (activity === "office") {
         if (state.needs.energy < 25) return done([{toast:"Too tired for an office contract. Rest first."}]);
-        if (absMinute(state.day,state.minute) - state.freelanceAt < 120) {
+        if (absMinute(state.day,state.minute) < state.freelanceAt) {
           return done([{toast:"Your contract shift is on cooldown. Explore the city first."}]);
         }
-        state.freelanceAt = absMinute(state.day,state.minute);
+        state.freelanceAt = absMinute(state.day,state.minute) + 125 + 120;
         successfulVisit = true;
         state.money += 46;
         state.needs.energy = clamp(state.needs.energy - 19);

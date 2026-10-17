@@ -1,10 +1,12 @@
 import { create } from "zustand";
 import type { GameState, UiState } from "@/game/types";
+import { SAVE_KEY,BACKUP_KEY,RECOVERY_KEY,loadSaveStatus,persistGameSave } from "@/game/save-codec";
 
 const emptyNeeds = { energy: 70, hunger: 70, hygiene: 70, social: 50, fun: 50 };
 
 export const useUi = create<UiState>(() => ({
   ready: false,
+  saveError: null,
   mode: "title",
   hasSave: false,
   name: "Alex",
@@ -58,6 +60,7 @@ export type GameImpl = {
   resume: () => void;
   quit: () => void;
   choose: (index: number) => void;
+  retrySave: () => void;
 };
 
 let impl: GameImpl | null = null;
@@ -78,34 +81,33 @@ export const gameApi: GameImpl = {
   resume: () => impl?.resume(),
   quit: () => impl?.quit(),
   choose: (index) => impl?.choose(index),
+  retrySave: () => impl?.retrySave(),
 };
 
-const SAVE_KEY = "daybreak-row-save-v1";
+export { loadSaveStatus } from "@/game/save-codec";
 
-export function loadSave(): GameState | null {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw) as GameState;
-    if (!data || data.version !== 1 || typeof data.money !== "number") return null;
-    return data;
-  } catch {
-    return null;
-  }
+export function loadSave():GameState|null {return loadSaveStatus(localStorage).state;}
+
+export function writeSave(state: GameState): boolean {
+  return persistGameSave(localStorage,state);
 }
 
-export function writeSave(state: GameState) {
-  try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-  } catch {
-    /* private mode / full storage */
-  }
+export function exportSave() {
+  // Export raw recovery material rather than reserializing a possibly damaged life.
+  const primary=localStorage.getItem(SAVE_KEY);
+  const backup=localStorage.getItem(BACKUP_KEY);
+  const recovery=localStorage.getItem(RECOVERY_KEY);
+  const blob=new Blob([JSON.stringify({primary,backup,recovery,exportedAt:new Date().toISOString()},null,2)],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="daybreak-row-save-recovery.json";a.click();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-
 export function clearSave() {
   try {
     localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem(BACKUP_KEY);
+    localStorage.removeItem(RECOVERY_KEY);
   } catch {
-    /* ignore */
+    /* storage inaccessible; never overwrite what remains */
   }
 }
