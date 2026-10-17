@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { doorTransitionLabel, parseDoorAction, reconcileIndoorArrival } from "@/game/door-transition";
 import { CITY_LIMITS, CITY_STOPS, districtAt } from "@/game/city-layout";
+import { discoverAt } from "@/game/discovery";
 import { createActor, disposeActorMaterials, faceYaw, type Actor } from "@/game/actors";
 import { createAudio } from "@/game/audio";
 import { NPC_META } from "@/game/content";
@@ -254,6 +255,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       cityPassportDay: s.cityPassportDay,
       cityPassportVisits: s.cityPassportVisits?.slice(),
       cityPassportClaimed: s.cityPassportClaimed,
+      discoveredDistricts: s.discoveredDistricts?.slice(),
       prompt: mode === "play" ? useUi.getState().prompt : null,
       dialogue,
       notice: mode === "sleep" ? (seq?.kind === "nap" ? "A short nap" : "Lights out") : mode === "shift" ? "On the clock" : null,
@@ -281,6 +283,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
 
   function begin(state: GameState) {
     play = reconcileIndoorArrival(state);
+    if (play.place === "street") discoverAt(play,play.x,play.z);
     doorTransition = null;
     useUi.setState({ veil: 0, transitionLabel: null, prompt: null });
     mode = "play";
@@ -321,6 +324,8 @@ export function mountGame(canvas: HTMLCanvasElement) {
       const notes = advance(play, 18, 0.65);
       showNotes(notes);
       play.x = stop.x; play.z = stop.z; play.yaw = stop.yaw;
+      const discovery = discoverAt(play,play.x,play.z);
+      if (discovery) pushToast(discovery);
       camYaw = stop.yaw; camPitch = 0.32; speed = 0; busyUntil = elapsed + 0.35;
       snapCam(play);
       useUi.setState({ veil: 1, prompt: null });
@@ -604,6 +609,10 @@ export function mountGame(canvas: HTMLCanvasElement) {
         const clamped = clampPos(play.place, hit.x, hit.z);
         play.x = clamped.x;
         play.z = clamped.z;
+        if (play.place === "street") {
+          const discovery = discoverAt(play,play.x,play.z);
+          if (discovery) { pushToast(discovery); remember(); }
+        }
         if (move.run) play.needs.energy = Math.max(0, play.needs.energy - 6 * dt * (2.2 / 60));
         audio.foot(elapsed * 1000);
       } else if (speed < 0.05) speed = 0;
@@ -674,7 +683,7 @@ export function mountGame(canvas: HTMLCanvasElement) {
       actor.group.visible = post.visible;
       actor.group.position.set(post.x, 0, post.z);
       faceYaw(actor.group, post.yaw);
-      actor.update(dt, 0, elapsed);
+      actor.update(dt, post.speed ?? 0, elapsed);
       if (actor.label) {
         const d = Math.hypot(post.x - shown.x, post.z - shown.z);
         actor.label.visible = post.visible && d < 16;

@@ -2,7 +2,7 @@ export type NeedId = "energy" | "hunger" | "hygiene" | "social" | "fun";
 export type Needs = Record<NeedId, number>;
 
 export type NpcId = "mara" | "ellis" | "theo" | "jun" | "idris";
-export type PlaceId = "street" | "home" | "cafe" | "market" | "office" | "bakery" | "gym";
+export type PlaceId = "street" | "home" | "cafe" | "market" | "office" | "bakery" | "gym" | "cinema" | "bookshop";
 
 export type GoalId =
   | "shower"
@@ -45,6 +45,7 @@ export type GameState = {
   cityPassportClaimed?: boolean;
   /** Optional cooldown, keeps older v1 saves compatible. */
   cityCourierNextAt?: number;
+  discoveredDistricts?: string[];
 };
 
 export type Mode = "title" | "play" | "phone" | "pause" | "dialogue" | "sleep" | "shift";
@@ -79,6 +80,7 @@ export type UiState = {
   cityPassportDay?: number;
   cityPassportVisits?: string[];
   cityPassportClaimed?: boolean;
+  discoveredDistricts?: string[];
   prompt: string | null;
   dialogue: DialogueView | null;
   toasts: Toast[];

@@ -7,12 +7,14 @@ export const DOOR_NAMES: Record<RoomId, string> = {
   office: "Northline Office",
   bakery: "Old Town Bakery",
   gym: "Civic Fitness",
+  cinema: "Metro Cinema",
+  bookshop: "Corner Books",
 };
 
 export type DoorAction = { building: RoomId; direction: "enter" | "exit" };
 
 export function parseDoorAction(id: string): DoorAction | null {
-  const match = /^(enter|exit)-(home|cafe|market|office|bakery|gym)$/.exec(id);
+  const match = /^(enter|exit)-(home|cafe|market|office|bakery|gym|cinema|bookshop)$/.exec(id);
   if (!match) return null;
   return { direction: match[1] as DoorAction["direction"], building: match[2] as RoomId };
 }

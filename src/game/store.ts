@@ -34,6 +34,7 @@ export const useUi = create<UiState>(() => ({
   cityPassportDay: 0,
   cityPassportVisits: [],
   cityPassportClaimed: false,
+  discoveredDistricts: [],
   prompt: null,
   dialogue: null,
   toasts: [],

@@ -1,5 +1,6 @@
 import { DIALOGUE, greetingNode, NPC_META, type Fx } from "@/game/content";
 import { CITY_SITES } from "@/game/city-layout";
+import { npcPublicRoutine } from "@/game/npc-routines";
 import { CITY_ROUTE_REWARD, claimPassport, passportSnapshot, stampPassport } from "@/game/city-passport";
 import { anchors, cafeB, marketB, officeB, rooms, SPAWN } from "@/game/layout";
 import { absMinute, hourOf, weekday } from "@/game/time";
@@ -134,6 +135,7 @@ export function officeOpen(s: GameState) {
 }
 
 export type NpcPost = {
+  speed?: number;
   x: number;
   z: number;
   yaw: number;
@@ -170,7 +172,14 @@ export function npcWhere(s: GameState): Record<NpcId, NpcPost> {
     place: "street",
     visible: s.place === "street" && ((h >= 8 && h < 12) || (h >= 14.5 && h < 19)),
   };
-  return { mara, ellis, theo, jun, idris };
+  const posts = { mara, ellis, theo, jun, idris };
+  if (s.place === "street") {
+    for(const id of ["mara","ellis","theo","jun","idris"] as const) {
+      const publicPost = npcPublicRoutine(id,s.minute);
+      if (publicPost) posts[id]={...publicPost,place:"street",visible:true};
+    }
+  }
+  return posts;
 }
 
 function pay(s: GameState, cost: number, notes: Note[]) {
@@ -182,7 +191,7 @@ function pay(s: GameState, cost: number, notes: Note[]) {
   return true;
 }
 
-function enter(s: GameState, id: "home" | "cafe" | "market" | "office" | "bakery" | "gym") {
+function enter(s: GameState, id: keyof typeof rooms) {
   const room = rooms[id];
   s.place = id;
   s.x = room.spawn.x;
@@ -190,7 +199,7 @@ function enter(s: GameState, id: "home" | "cafe" | "market" | "office" | "bakery
   s.yaw = room.spawn.yaw;
 }
 
-function exit(s: GameState, id: "home" | "cafe" | "market" | "office" | "bakery" | "gym") {
+function exit(s: GameState, id: keyof typeof rooms) {
   const room = rooms[id];
   s.place = "street";
   s.x = room.exit.x;
@@ -219,6 +228,8 @@ export function buildActions(): Action[] {
   const office = rooms.office;
   const bakery = rooms.bakery;
   const gym = rooms.gym;
+  const cinema = rooms.cinema;
+  const bookshop = rooms.bookshop;
   const base: Action[] = [
     {
       id: "enter-home",
@@ -649,6 +660,129 @@ export function buildActions(): Action[] {
         return done(notes);
       },
     },
+    // Two more fully enterable connected-city venues with physical gameplay.
+    {
+      id: "enter-cinema",
+      place: "street",
+      x: 148, z: -47, r: 2.3,
+      label: () => "Enter Metro Cinema",
+      run: (state) => {
+        enter(state,"cinema");
+        return done([{caption:"Low lobby lights, film posters and the distant murmur of the next showing."}],true);
+      },
+    },
+    {
+      id: "exit-cinema",
+      place: "cinema",
+      x: cinema.door.x, z: cinema.door.z, r: 1.3,
+      label: () => "Leave Metro Cinema",
+      run: (state) => { exit(state,"cinema");return done([],true); },
+    },
+    {
+      id: "cinema-ticket",
+      place: "cinema",
+      x: 1.45, z: 1023.7, r: 1.75,
+      label: () => "Watch a movie · $16",
+      run: (state) => {
+        const notes: Note[]=[];
+        if(!pay(state,16,notes))return done(notes);
+        const before=state.day;
+        state.needs.fun=clamp(state.needs.fun+38);
+        state.needs.social=clamp(state.needs.social+5);
+        notes.push(...advance(state,98,0.58));
+        notes.push({toast:"Metro Cinema showing · -$16",caption:"The screen fades to black. For a while, the city can wait."});
+        if(state.day===before){const stamp=stampPassport(state,"cinema");if(stamp)notes.push({toast:stamp});}
+        return done(notes);
+      },
+    },
+    {
+      id: "cinema-snack",
+      place: "cinema",
+      x: -3.1, z: 1023.5, r: 1.5,
+      label: () => "Popcorn & drink · $4",
+      run: (state) => {
+        const notes:Note[]=[];
+        if(!pay(state,4,notes))return done(notes);
+        state.needs.hunger=clamp(state.needs.hunger+14);
+        state.needs.fun=clamp(state.needs.fun+5);
+        notes.push(...advance(state,7,0.7));
+        notes.push({toast:"Popcorn & drink · -$4",caption:"The popcorn smells better than you remember."});
+        return done(notes);
+      },
+    },
+    {
+      id: "cinema-usher",
+      place: "cinema",
+      x: 3.9,z:1025.4,r:1.4,
+      label: () => "Ask the usher",
+      run: (state) => {
+        state.needs.social=clamp(state.needs.social+6);
+        state.needs.fun=clamp(state.needs.fun+2);
+        const notes=advance(state,8,0.6);
+        notes.push({toast:"Usher: The next film starts soon.",caption:"They know every seat, every story and every late arrival."});
+        return done(notes);
+      },
+    },
+    {
+      id: "enter-bookshop",
+      place: "street",
+      x: 108, z: -102, r: 2.3,
+      label: () => "Enter Corner Books",
+      run: (state) => {
+        enter(state,"bookshop");
+        return done([{caption:"Quiet shelves, old wood, paper and the promise of a different afternoon."}],true);
+      },
+    },
+    {
+      id: "exit-bookshop",
+      place: "bookshop",
+      x: bookshop.door.x,z:bookshop.door.z,r:1.3,
+      label: () => "Leave Corner Books",
+      run: (state) => {exit(state,"bookshop");return done([],true);},
+    },
+    {
+      id: "bookshop-buy",
+      place: "bookshop",
+      x: -2.35,z:1123.0,r:1.55,
+      label: () => "Choose a book · $8",
+      run: (state) => {
+        const notes:Note[]=[];
+        if(!pay(state,8,notes))return done(notes);
+        const before=state.day;
+        state.needs.fun=clamp(state.needs.fun+21);
+        state.needs.social=clamp(state.needs.social+6);
+        notes.push(...advance(state,30,0.68));
+        notes.push({toast:"A good book · -$8",caption:"You leave with more stories than you arrived with."});
+        if(state.day===before){const stamp=stampPassport(state,"bookshop");if(stamp)notes.push({toast:stamp});}
+        return done(notes);
+      },
+    },
+    {
+      id: "bookshop-read",
+      place: "bookshop",
+      x: 2.1,z:1123.0,r:1.6,
+      label: () => "Read in the nook · free",
+      run: (state) => {
+        state.needs.fun=clamp(state.needs.fun+13);
+        state.needs.energy=clamp(state.needs.energy+4);
+        const notes=advance(state,25,0.48);
+        notes.push({toast:"A quiet chapter",caption:"Between the shelves, the city feels far away."});
+        return done(notes);
+      },
+    },
+    {
+      id: "bookshop-owner",
+      place: "bookshop",
+      x: 0.9,z:1125.15,r:1.2,
+      label: () => "Talk to the bookseller",
+      run: (state) => {
+        state.needs.social=clamp(state.needs.social+8);
+        state.needs.fun=clamp(state.needs.fun+3);
+        const notes=advance(state,10,0.5);
+        notes.push({toast:"Bookseller: Every book finds its reader.",caption:"They point you toward a favorite on the bottom shelf."});
+        return done(notes);
+      },
+    },
     {
       id: "bench",
       place: "street",
@@ -681,7 +815,7 @@ export function buildActions(): Action[] {
       },
     },
   ];
-  const city: Action[] = CITY_SITES.filter(site=>site.id!=="bakery"&&site.id!=="gym").map((site) => ({
+  const city: Action[] = CITY_SITES.filter(site=>!["bakery","gym","cinema","bookshop"].includes(site.id)).map((site) => ({
     id: "city-" + site.id,
     place: "street" as const,
     x: site.x,

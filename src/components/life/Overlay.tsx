@@ -16,8 +16,10 @@ import {
   Zap,
 } from "lucide-react";
 import { GOAL_DEFS, NPC_META } from "@/game/content";
+import { npcScheduleDescription } from "@/game/npc-routines";
 import { CITY_STOPS, CITY_SITES, DISTRICTS, AVENUES, CROSS_STREETS, districtAt } from "@/game/city-layout";
 import { CITY_ROUTE_REWARD, passportSnapshot } from "@/game/city-passport";
+import { DISTRICT_BONUS, EXPLORER_BONUS, discoveredIds } from "@/game/discovery";
 import { gameApi, useUi } from "@/game/store";
 import { input } from "@/game/input";
 import { VirtualStick, type StickVector } from "@/game/virtual-stick";
@@ -572,6 +574,7 @@ function NowTab() {
 
 function PeopleTab() {
   const rel = useUi((s) => s.rel);
+  const minute=useUi((s)=>s.minute);
   const ids = Object.keys(NPC_META) as NpcId[];
   return (
     <ul className="flex flex-col gap-3">
@@ -582,7 +585,7 @@ function PeopleTab() {
             <p className="text-xs text-mist">{Math.round(rel[id])}</p>
           </div>
           <p className="text-xs text-clay">{NPC_META[id].role}</p>
-          <p className="mt-1 text-sm leading-snug text-dusk">{NPC_META[id].where}</p>
+          <p className="mt-1 text-sm leading-snug text-dusk">{npcScheduleDescription(id,minute)}</p>
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-paper">
             <div className="h-full bg-sage" style={{ width: `${rel[id]}%` }} />
           </div>
@@ -622,6 +625,10 @@ function PlacesTab() {
     { id: "cafe", name: "Harbor Cafe", hours: "Every day, 7 AM – 7 PM", icon: Utensils },
     { id: "market", name: "Cho's Market", hours: "Every day, 8 AM – 8 PM", icon: Wallet },
     { id: "office", name: "Northline Office", hours: "Weekdays 8–6 · Sat 10–2 · Sun closed", icon: Briefcase },
+    { id: "bakery", name: "Old Town Bakery", hours: "Old Town · pastry counter and baker", icon: Utensils },
+    { id: "gym", name: "Civic Fitness", hours: "Civic Quarter · workouts and trainer", icon: Briefcase },
+    { id: "cinema", name: "Metro Cinema", hours: "Downtown · films, snacks and usher", icon: BookOpen },
+    { id: "bookshop", name: "Corner Books", hours: "Civic Quarter · books, reading nook and bookseller", icon: BookOpen },
     { id: "pier", name: "The pier", hours: "South end, past the pocket park", icon: MapPin },
     { id: "bench", name: "Pocket park", hours: "Benches, a fountain, no fee", icon: BookOpen },
   ];
@@ -653,6 +660,8 @@ function CityTab() {
   const cityPassportVisits = useUi((s) => s.cityPassportVisits);
   const cityPassportClaimed = useUi((s) => s.cityPassportClaimed);
   const passport = passportSnapshot({day,cityPassportDay,cityPassportVisits,cityPassportClaimed});
+  const discoveries = useUi((s) => s.discoveredDistricts);
+  const visited = discoveredIds({discoveredDistricts:discoveries});
   const money = useUi((s) => s.money);
   const place = useUi((s) => s.place);
   const district = useUi((s) => s.district);
@@ -663,6 +672,13 @@ function CityTab() {
   const plotY = (z: number) => 15 + (z + 154) * 1.15;
   return (
     <div className="space-y-3 pb-2">
+      <section className="rounded-2xl bg-paper-2 p-3 text-ink" aria-label="City explorer progress">
+        <div className="flex items-center justify-between gap-2"><p className="font-display text-lg">City explorer</p><span className="text-sm font-medium">{visited.length}/{DISTRICTS.length}</span></div>
+        <p className="mt-1 text-xs text-dusk">Discover each district by walking or riding transit. Earn ${DISTRICT_BONUS} per new district and ${EXPLORER_BONUS} for discovering all five.</p>
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          {DISTRICTS.map(d=><span key={d.id} className={visited.includes(d.id) ? "rounded-lg bg-emerald-100 px-2 py-1 text-xs text-emerald-900" : "rounded-lg bg-paper px-2 py-1 text-xs text-dusk"}>{visited.includes(d.id)?"✓ ":"○ "}{d.name}</span>)}
+        </div>
+      </section>
       <section className="rounded-2xl bg-paper-2 p-3 text-ink" aria-label="Daily city passport">
         <div className="flex items-center justify-between gap-2">
           <p className="font-display text-lg">Today's city route</p>

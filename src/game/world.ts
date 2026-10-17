@@ -76,6 +76,8 @@ export function buildWorld(scene: THREE.Scene): World {
     office: [],
     bakery: [],
     gym: [],
+    cinema: [],
+    bookshop: [],
   };
   const disposables: { dispose: () => void }[] = [];
 
@@ -194,17 +196,17 @@ export function buildWorld(scene: THREE.Scene): World {
   const boxes = bucket(unit, brick, 80);
   const stuccos = bucket(unit, stucco, 40);
   const cools = bucket(unit, stuccoCool, 20);
-  const woods = bucket(unit, wood, 80);
+  const woods = bucket(unit, wood, 155);
   const roofs = bucket(unit, roof, 20);
-  const concretes = bucket(unit, concrete, 40);
-  const metals = bucket(unit, metal, 40);
+  const concretes = bucket(unit, concrete, 65);
+  const metals = bucket(unit, metal, 110);
   const leaves = bucket(sphere, leaf, 40, true);
   const leaves2 = bucket(sphere, leaf2, 20, true);
   const trunks = bucket(cyl, trunk, 30);
   const awnings = bucket(unit, fabricCafe, 6, false);
   const awnings2 = bucket(unit, fabricMarket, 4, false);
-  const glasses = bucket(unit, glassMat, 220, false);
-  const glows = bucket(unit, glowMat, 12, false);
+  const glasses = bucket(unit, glassMat, 260, false);
+  const glows = bucket(unit, glowMat, 16, false);
 
   function wallBucket(kind: "brick" | "stucco" | "cool") {
     if (kind === "brick") return boxes;
@@ -555,6 +557,66 @@ export function buildWorld(scene: THREE.Scene): World {
   colliders.gym.push({minX:-4,maxX:-1.32,minZ:920.7,maxZ:921.28});
   colliders.gym.push({minX:1.5,maxX:3.5,minZ:921.6,maxZ:922.7});
 
+  // Metro Cinema: an actual foyer with a projected-screen mockup, a ticket
+  // desk, framed film art and spaced cinema seating. All props are very cheap.
+  const cinema = rooms.cinema;
+  furnishRoom("cinema",0,1020,cinema.x0,cinema.x1,cinema.z0,cinema.z1);
+  const cinemaScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(5.9,2.0),
+    new THREE.MeshBasicMaterial({color:0xb8c9d6,side:THREE.DoubleSide,toneMapped:false}),
+  );
+  cinemaScreen.position.set(0,1.62,1020.55);
+  scene.add(cinemaScreen);
+  disposables.push(cinemaScreen.geometry,cinemaScreen.material as THREE.Material);
+  // Rows sit between the screen and the lobby. Central aisles stay clear.
+  for(const z of [1022.35,1023.55]){
+    for(const x of [-4.4,-3.3,3.3,4.4]){
+      woods.add(x-0.36,0.33,z-0.22,x+0.36,0.49,z+0.30);
+      metals.add(x-0.35,0.4,z-0.34,x+0.35,1.03,z-0.16);
+      colliders.cinema.push({minX:x-0.38,maxX:x+0.38,minZ:z-0.37,maxZ:z+0.32});
+    }
+  }
+  woods.add(-4.75,0.45,1025.45,-2.1,1.16,1026.25);
+  metals.add(-4.7,1.1,1025.6,-2.2,1.18,1026.1);
+  colliders.cinema.push({minX:-4.75,maxX:-2.1,minZ:1025.45,maxZ:1026.25});
+  // Projection light and three poster frames on a side wall.
+  const projection = new THREE.PointLight(0x8baacf,14,8,2);
+  projection.position.set(0,2.05,1021.65);
+  scene.add(projection);
+  for(let i=0;i<3;i++){
+    const z=1023.1+i*1.35;
+    woods.add(-5.75,1.00,z-0.37,-5.61,2.17,z+0.37);
+    glows.add(-5.61,1.14,z-0.3,-5.57,2.02,z+0.3);
+  }
+
+  // Corner Books: multiple shelf islands, spine geometry, reading nook and
+  // glass counter while keeping walkable aisles to both activities and the exit.
+  const bookshop = rooms.bookshop;
+  furnishRoom("bookshop",0,1120,bookshop.x0,bookshop.x1,bookshop.z0,bookshop.z1);
+  for(const x of [-3.95,-2.6,2.45,3.9]){
+    for(const y of [0.58,1.20,1.86]){
+      woods.add(x-0.44,y,1120.95,x+0.44,y+0.11,1122.55);
+    }
+    for(let i=0;i<4;i++){
+      const z=1121.03+i*0.35;
+      concretes.add(x-0.38,0.69,z-0.13,x+0.38,1.13,z+0.13);
+      glasses.add(x-0.36,1.32,z-0.12,x+0.36,1.74,z+0.11);
+    }
+    colliders.bookshop.push({minX:x-0.48,maxX:x+0.48,minZ:1120.9,maxZ:1122.58});
+  }
+  woods.add(-1.05,0.67,1122.1,0.35,0.85,1122.65);
+  woods.add(2.2,0.36,1124.2,4.15,0.62,1125.1);
+  colliders.bookshop.push({minX:2.2,maxX:4.15,minZ:1124.2,maxZ:1125.1});
+  glasses.add(-4.9,0.75,1125.7,-4.84,2.18,1127.15);
+  const readingRug = new THREE.Mesh(
+    new THREE.PlaneGeometry(2.5,1.75),
+    new THREE.MeshStandardMaterial({color:0x6d6054,roughness:0.95}),
+  );
+  readingRug.rotation.x = -Math.PI/2;
+  readingRug.position.set(2.6,0.055,1125.85);
+  scene.add(readingRug);
+  disposables.push(readingRug.geometry,readingRug.material as THREE.Material);
+
   // Two local residents reuse the existing, fully rigged licensed human models.
   // Their animation mixers tick only when the corresponding indoor venue is active.
   const venueResidents: Array<{ place: PlaceId; rig: LoadedHuman }> = [];
@@ -562,6 +624,8 @@ export function buildWorld(scene: THREE.Scene): World {
   for(const resident of [
     {place:"bakery" as PlaceId, kind:"pedestrian-b" as const, x:-2.4,z:822.35,yaw:Math.PI},
     {place:"gym" as PlaceId, kind:"pedestrian-a" as const,x:2.95,z:924.2,yaw:1.9},
+    {place:"cinema" as PlaceId, kind:"pedestrian-c" as const,x:3.9,z:1025.4,yaw:2.0},
+    {place:"bookshop" as PlaceId, kind:"pedestrian-b" as const,x:0.9,z:1125.15,yaw:1.1},
   ]) {
     void loadRiggedHuman(resident.kind).then(rig=>{
       if(residentsDisposed){rig.mixer.stopAllAction();return;}
