@@ -65,3 +65,7 @@ The original coastal Daybreak Row neighborhood remains available. A connected ma
 - Old version-1 saves with a character directly on an indoor exit are relocated to the safe interior arrival, preserving the other save fields. Save format remains version 1.
 - Quick regression: `npm run test:doors`, `npm run typecheck`, `npm run build`. Browser QA covered all eight enter/exit paths with state/position/camera receipts. Touchscreen feel on the physical Pixel still requires direct user test.
 - New city expansion buildings still remain exterior scenery until enterable interiors are explicitly implemented for them.
+## Permanent daylight (October 16, 2026)
+- The entire outdoor city and all interiors remain in **clear 12:30 PM sunlight** at all hours. No darkness, orange sunset, stars, or illuminated night streetlights.
+- Only visual rendering and ambient day/night selection use the fixed midday sky. The in-game HUD clock still advances through 24 hours; NPC schedules, jobs, economy, needs, day changes and saved games are untouched.
+- `npm run test:daylight` verifies fixed illumination and ordinary game-time functions. Tested the actual Downtown scene at 12:00 AM: in-game HUD displayed midnight while outdoor lighting remained bright blue daylight.

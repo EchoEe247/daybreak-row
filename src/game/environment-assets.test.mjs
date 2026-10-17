@@ -25,7 +25,8 @@ test("all Poly Haven 1K files retain CC0 provenance and pass recorded SHA-256 ha
   }
 });
 test("every photographed furniture GLTF references locally shipped binaries and textures",()=>{
-  for(const item of manifest.assets.filter(a=>a.kind==="model")){
+  for(const item of manifest.assets){
+    if(item.kind!=="model")continue;
     const full=resolve(root,item.gltf);
     const gltf=JSON.parse(readFileSync(full,"utf8"));
     for(const section of ["buffers","images"]){

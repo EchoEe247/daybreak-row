@@ -22,7 +22,7 @@ import {
   type Action,
 } from "@/game/logic";
 import { bindGame, clearSave, loadSave, useUi, writeSave } from "@/game/store";
-import { sampleSky } from "@/game/time";
+import { PERMANENT_DAYLIGHT } from "@/game/time";
 import type { GameState, Mode, NpcId, PlaceId } from "@/game/types";
 import { buildWorld, type Collider } from "@/game/world";
 
@@ -36,6 +36,7 @@ declare global {
       getCameraYaw: () => number;
       getFun: () => number;
       setPositionForQA: ((x: number, z: number) => void) | undefined;
+      setTimeForQA: ((minute: number) => void) | undefined;
       setSceneForQA: ((place: PlaceId, x: number, z: number) => void) | undefined;
       getSpeed: () => number;
       getPosition: () => { x: number; z: number };
@@ -455,6 +456,11 @@ export function mountGame(canvas: HTMLCanvasElement) {
       snapCam(play);
       sync(true);
     } : undefined,
+    setTimeForQA: new URLSearchParams(window.location.search).has("touchqa") ? (minute) => {
+      if (!play || !Number.isFinite(minute)) return;
+      play.minute = Math.min(1439, Math.max(0, Math.floor(minute)));
+      sync(true);
+    } : undefined,
     getSpeed: () => speed,
     getPosition: () => ({ x: sim().x, z: sim().z }),
     getHumanQA: () => {
@@ -697,8 +703,8 @@ export function mountGame(canvas: HTMLCanvasElement) {
       focus.set(play.x, 1, play.z);
     }
 
-    const minute = title ? preview.minute : (play?.minute ?? preview.minute);
-    const sky = sampleSky(minute);
+    // The clock and daily simulation continue, but the scene never becomes night.
+    const sky = PERMANENT_DAYLIGHT;
     renderer.toneMappingExposure = sky.exposure * (title ? 1.02 : 1);
     world.update(dt, sky, focus, shown.place, elapsed);
     audio.setAmbience(shown.place === "street", sky.lamp > 0.4);

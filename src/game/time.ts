@@ -88,6 +88,15 @@ export function sampleSky(minute: number): SkySample {
   };
 }
 
+/**
+ * Visual-only fixed clear midday. The game clock, NPC schedules, shops, jobs,
+ * cooldowns and saves still progress through ordinary in-game time.
+ */
+export const PERMANENT_DAYLIGHT: Readonly<SkySample> = Object.freeze({
+  ...sampleSky(12 * 60 + 30),
+  sun: Object.freeze({ ...sampleSky(12 * 60 + 30).sun }),
+});
+
 export function placeLabel(place: string) {
   switch (place) {
     case "home":
