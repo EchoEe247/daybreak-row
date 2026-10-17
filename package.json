@@ -28,7 +28,7 @@
     "test:environment": "node --experimental-strip-types --test src/game/environment-assets.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/city-layout.test.mjs",
     "test:daylight": "node --experimental-strip-types --test src/game/time-daylight.test.mjs",
     "test:streets": "node --experimental-strip-types --test src/game/street-assets.test.mjs src/game/environment-assets.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/city-layout.test.mjs",
-    "test:game": "node --experimental-strip-types --test src/game/npc-routines.test.mjs src/game/discovery.test.mjs src/game/city-passport.test.mjs src/game/city-layout.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/environment-assets.test.mjs src/game/street-assets.test.mjs src/game/time-daylight.test.mjs scripts/human-assets.test.mjs scripts/realism-assets.test.mjs src/game/save-codec.test.mjs"
+    "test:game": "node --experimental-strip-types --test src/game/npc-routines.test.mjs src/game/discovery.test.mjs src/game/city-passport.test.mjs src/game/city-layout.test.mjs src/game/door-transition.test.mjs src/game/virtual-stick.test.mjs src/game/environment-assets.test.mjs src/game/street-assets.test.mjs src/game/time-daylight.test.mjs scripts/human-assets.test.mjs scripts/realism-assets.test.mjs scripts/qa/save-codec.test.mjs"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.4",

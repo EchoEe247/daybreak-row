@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {parseGameSave,loadSaveStatus,persistGameSave,SAVE_KEY,BACKUP_KEY,RECOVERY_KEY} from "./save-codec.ts";
+import {parseGameSave,loadSaveStatus,persistGameSave,SAVE_KEY,BACKUP_KEY,RECOVERY_KEY} from "../../src/game/save-codec.ts";
 
 const good=()=>({
  version:1,name:"Alex",day:2,minute:615,money:140,food:2,
