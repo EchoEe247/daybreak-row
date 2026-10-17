@@ -16,7 +16,8 @@ import {
   Zap,
 } from "lucide-react";
 import { GOAL_DEFS, NPC_META } from "@/game/content";
-import { CITY_STOPS, CITY_SITES, DISTRICTS, AVENUES, CROSS_STREETS } from "@/game/city-layout";
+import { CITY_STOPS, CITY_SITES, DISTRICTS, AVENUES, CROSS_STREETS, districtAt } from "@/game/city-layout";
+import { CITY_ROUTE_REWARD, passportSnapshot } from "@/game/city-passport";
 import { gameApi, useUi } from "@/game/store";
 import { input } from "@/game/input";
 import { VirtualStick, type StickVector } from "@/game/virtual-stick";
@@ -647,6 +648,11 @@ function PlacesTab() {
 }
 
 function CityTab() {
+  const day = useUi((s) => s.day);
+  const cityPassportDay = useUi((s) => s.cityPassportDay);
+  const cityPassportVisits = useUi((s) => s.cityPassportVisits);
+  const cityPassportClaimed = useUi((s) => s.cityPassportClaimed);
+  const passport = passportSnapshot({day,cityPassportDay,cityPassportVisits,cityPassportClaimed});
   const money = useUi((s) => s.money);
   const place = useUi((s) => s.place);
   const district = useUi((s) => s.district);
@@ -657,12 +663,38 @@ function CityTab() {
   const plotY = (z: number) => 15 + (z + 154) * 1.15;
   return (
     <div className="space-y-3 pb-2">
+      <section className="rounded-2xl bg-paper-2 p-3 text-ink" aria-label="Daily city passport">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-display text-lg">Today's city route</p>
+          <span className="shrink-0 text-sm font-medium">{passport.completed.length}/3</span>
+        </div>
+        <p className="mt-1 text-xs text-dusk">Visit all three stops, then return to City Hall for a ${CITY_ROUTE_REWARD} reward.</p>
+        <ul className="mt-2 space-y-1.5">
+          {passport.tasks.map((task) => {
+            const done = passport.visits.includes(task.id);
+            return <li key={task.id} className="flex gap-2 text-sm">
+              <span aria-hidden="true" className={done ? "text-emerald-700" : "text-dusk"}>{done ? "✓" : "○"}</span>
+              <span className={done ? "line-through text-dusk" : ""}>{task.name} <span className="text-xs text-dusk">· {districtAt(task.x,task.z)}</span></span>
+            </li>;
+          })}
+        </ul>
+        <p className="mt-2 text-xs font-medium text-dusk">
+          {passport.claimed ? "Reward collected today. A new route begins tomorrow." : passport.ready ? "Route completed! Interact with City Hall to collect your reward." : "Complete activities at the marked locations. A new route appears each day."}
+        </p>
+      </section>
       <div className="rounded-2xl bg-ink p-3 text-paper">
         <p className="font-display text-xl">Explore the city</p>
         <p className="mt-1 text-xs text-foam/80">Walk connected streets or ride city transit for $5 and 18 minutes.</p>
-        <svg role="img" aria-label="Schematic city map and stations" viewBox="0 0 300 225" className="mt-3 w-full rounded-xl bg-[#263744]">
+        <svg role="img" aria-label="Schematic city map showing your location, transit stops, and daily route destinations" viewBox="0 0 300 225" className="mt-3 w-full rounded-xl bg-[#263744]">
           {AVENUES.map((x) => <line key={x} x1={plotX(x)} x2={plotX(x)} y1={plotY(-150)} y2={plotY(8)} stroke="#57707c" strokeWidth="5" />)}
           {CROSS_STREETS.map((z) => <line key={z} x1={plotX(39)} x2={plotX(187)} y1={plotY(z)} y2={plotY(z)} stroke="#57707c" strokeWidth="5" />)}
+          {passport.tasks.map((task,i) => {
+            const done=passport.visits.includes(task.id);
+            return <g key={task.id}>
+              <circle cx={plotX(task.x)} cy={plotY(task.z)} r="9" fill={done ? "#456f55" : "#f0bb64"} stroke="#18242e" strokeWidth="2" />
+              <text x={plotX(task.x)} y={plotY(task.z)+3.6} textAnchor="middle" fontSize="11" fontWeight="bold" fill={done ? "#ffffff" : "#18242e"}>{done ? "✓" : i+1}</text>
+            </g>;
+          })}
           <circle cx={plotX(playerX)} cy={plotY(playerZ)} r="8" fill="none" stroke="#ffffff" strokeWidth="2" />
           <circle cx={plotX(playerX)} cy={plotY(playerZ)} r="3" fill="#ffffff" />
           {CITY_STOPS.map((stop, i) => (
@@ -672,6 +704,7 @@ function CityTab() {
             </g>
           ))}
         </svg>
+        <p className="mt-1 text-xs text-foam/80">Gold numbered markers: today’s route · Orange dots: transit · White ring: you</p>
       </div>
       <p className="text-sm text-dusk">
         {place !== "street" ? "Step outside to use city transit." : `District: ${district}. ${canTravel ? "Choose a stop below." : "A transit ride requires $5."}`}

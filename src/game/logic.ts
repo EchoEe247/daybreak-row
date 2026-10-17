@@ -1,5 +1,6 @@
 import { DIALOGUE, greetingNode, NPC_META, type Fx } from "@/game/content";
 import { CITY_SITES } from "@/game/city-layout";
+import { CITY_ROUTE_REWARD, claimPassport, passportSnapshot, stampPassport } from "@/game/city-passport";
 import { anchors, cafeB, marketB, officeB, rooms, SPAWN } from "@/game/layout";
 import { absMinute, hourOf, weekday } from "@/game/time";
 import type { GameState, GoalId, NeedId, NpcId, PlaceId } from "@/game/types";
@@ -565,13 +566,24 @@ export function buildActions(): Action[] {
     x: site.x,
     z: site.z,
     r: 2.35,
-    label: () => site.name + " · " + site.detail,
+    label: (s) => site.id === "townhall" && passportSnapshot(s).ready ? `Claim city route · ${CITY_ROUTE_REWARD}` : site.name + " · " + site.detail,
     run: (state: GameState) => {
       const notes: Note[] = [];
       const activity = site.id;
+      const arrivedDay = state.day;
+      let successfulVisit = false;
+      if (activity === "townhall" && passportSnapshot(state).ready) {
+        const reward = claimPassport(state);
+        if (reward) {
+          notes.push({ toast: reward, caption: "You made the rounds. The clerk signs your city passport.", log: reward });
+          notes.push(...advance(state, 8, 0.4));
+          return done(notes);
+        }
+      }
       if (activity === "foodcart") {
         if (state.money < 9) return done([{toast:"You'll need $9 for lunch."}]);
         state.money -= 9;
+        successfulVisit = true;
         state.needs.hunger = clamp(state.needs.hunger + 34);
         notes.push({toast:"Lunch from the food cart. -$9",caption:"Steam rises from the busy sidewalk."});
         notes.push(...advance(state,17,0.6));
@@ -581,6 +593,7 @@ export function buildActions(): Action[] {
           return done([{toast:"Your contract shift is on cooldown. Explore the city first."}]);
         }
         state.freelanceAt = absMinute(state.day,state.minute);
+        successfulVisit = true;
         state.money += 46;
         state.needs.energy = clamp(state.needs.energy - 19);
         state.needs.hunger = clamp(state.needs.hunger - 9);
@@ -590,11 +603,62 @@ export function buildActions(): Action[] {
       } else if (activity === "hospital") {
         if (state.money < 14) return done([{toast:"The clinic visit is $14. Try the free library or plaza."}]);
         state.money -= 14;
+        successfulVisit = true;
         state.needs.energy = clamp(state.needs.energy + 26);
         state.needs.hygiene = clamp(state.needs.hygiene + 12);
         notes.push({toast:"Community clinic visit. -$14",caption:"The city takes care of its people."});
         notes.push(...advance(state,32,0.5));
+      } else if (activity === "bakery") {
+        if (!pay(state,7,notes)) return done(notes);
+        successfulVisit = true;
+        state.needs.hunger = clamp(state.needs.hunger + 27);
+        state.needs.fun = clamp(state.needs.fun + 5);
+        notes.push(...advance(state,16,0.65));
+        notes.push({toast:"Fresh bread from Old Town Bakery · -$7",caption:"The paper bag is still warm."});
+      } else if (activity === "gym") {
+        if (!pay(state,12,notes)) return done(notes);
+        if (state.needs.energy < 19) { state.money += 12; return done([{toast:"You're too tired to train. Sleep first."}]); }
+        successfulVisit = true;
+        state.needs.energy = clamp(state.needs.energy - 17);
+        state.needs.hygiene = clamp(state.needs.hygiene - 11);
+        state.needs.fun = clamp(state.needs.fun + 24);
+        notes.push(...advance(state,65,0.9));
+        notes.push({toast:"Civic Fitness workout · -$12",caption:"Another lap. You'll feel it tomorrow."});
+      } else if (activity === "cinema") {
+        if (!pay(state,16,notes)) return done(notes);
+        successfulVisit = true;
+        state.needs.fun = clamp(state.needs.fun + 38);
+        state.needs.social = clamp(state.needs.social + 5);
+        notes.push(...advance(state,98,0.58));
+        notes.push({toast:"Metro Cinema ticket · -$16",caption:"The city disappears for the length of a movie."});
+      } else if (activity === "laundry") {
+        if (!pay(state,6,notes)) return done(notes);
+        successfulVisit = true;
+        state.needs.hygiene = clamp(state.needs.hygiene + 36);
+        state.needs.fun = clamp(state.needs.fun + 3);
+        notes.push(...advance(state,42,0.8));
+        notes.push({toast:"Fresh Spin laundry complete · -$6",caption:"Fresh clothes and a little less chaos."});
+      } else if (activity === "bookshop") {
+        if (!pay(state,8,notes)) return done(notes);
+        successfulVisit = true;
+        state.needs.fun = clamp(state.needs.fun + 21);
+        state.needs.social = clamp(state.needs.social + 6);
+        notes.push(...advance(state,30,0.68));
+        notes.push({toast:"Corner Books visit · -$8",caption:"A new story in the middle of the city."});
+      } else if (activity === "courier") {
+        const now = absMinute(state.day,state.minute);
+        if (now < (state.cityCourierNextAt ?? 0)) return done([{toast:"Parcel Dispatch has no new route yet. Return later."}]);
+        if (state.needs.energy < 23) return done([{toast:"You need more energy before taking a parcel route."}]);
+        successfulVisit = true;
+        state.cityCourierNextAt = now + 230;
+        state.money += 38;
+        state.needs.energy = clamp(state.needs.energy - 20);
+        state.needs.hunger = clamp(state.needs.hunger - 9);
+        state.goals.earn = true;
+        notes.push(...advance(state,86,0.85));
+        notes.push({toast:"Parcels delivered · +$38",caption:"The dispatch board clears your route."});
       } else {
+        successfulVisit = true;
         const extra = activity === "gallery" ? 24 : activity === "library" ? 17 : activity === "busking" ? 13 : activity === "station" ? 9 : 8;
         state.needs.fun = clamp(state.needs.fun + extra);
         state.needs.social = clamp(state.needs.social + (activity === "busking" ? 10 : 4));
@@ -607,6 +671,10 @@ export function buildActions(): Action[] {
           station:"The platforms rumble as trains thread through the city."
         };
         notes.push({toast:site.name + " visited",caption:lines[activity] ?? "Another corner of the city."});
+      }
+      if (successfulVisit && state.day === arrivedDay) {
+        const stamp = stampPassport(state, activity);
+        if (stamp) notes.push({ toast: stamp, log: stamp });
       }
       state.log.unshift("Visited " + site.name + ".");
       state.log = state.log.slice(0,16);

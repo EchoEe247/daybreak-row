@@ -29,6 +29,12 @@ export const CITY_SITES = [
   { id: "office", name: "Downtown Offices", x: 145, z: -48, detail: "Contract shift" },
   { id: "gallery", name: "City Gallery", x: 147, z: -88, detail: "Free exhibition" },
   { id: "station", name: "Central Station", x: 164, z: -128, detail: "Rail concourse" },
+  { id: "bakery", name: "Old Town Bakery", x: 82, z: -47, detail: "$7 fresh pastry" },
+  { id: "gym", name: "Civic Fitness", x: 122, z: -47, detail: "$12 workout session" },
+  { id: "cinema", name: "Metro Cinema", x: 148, z: -47, detail: "$16 movie ticket" },
+  { id: "laundry", name: "Fresh Spin Laundry", x: 82, z: -88, detail: "$6 wash and dry" },
+  { id: "bookshop", name: "Corner Books", x: 108, z: -102, detail: "$8 book browsing" },
+  { id: "courier", name: "Parcel Dispatch", x: 162, z: -101, detail: "+$38 delivery shift" },
 ] as const;
 
 export function districtAt(x: number, z: number): string {

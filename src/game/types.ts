@@ -39,6 +39,12 @@ export type GameState = {
   freelanceAt: number;
   collapseAt: number;
   welcomed: boolean;
+  /** Optional for v1 saves created before city routes existed. */
+  cityPassportDay?: number;
+  cityPassportVisits?: string[];
+  cityPassportClaimed?: boolean;
+  /** Optional cooldown, keeps older v1 saves compatible. */
+  cityCourierNextAt?: number;
 };
 
 export type Mode = "title" | "play" | "phone" | "pause" | "dialogue" | "sleep" | "shift";
@@ -70,6 +76,9 @@ export type UiState = {
   district: string;
   playerX: number;
   playerZ: number;
+  cityPassportDay?: number;
+  cityPassportVisits?: string[];
+  cityPassportClaimed?: boolean;
   prompt: string | null;
   dialogue: DialogueView | null;
   toasts: Toast[];

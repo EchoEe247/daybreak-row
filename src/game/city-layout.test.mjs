@@ -18,7 +18,7 @@ test("street grid has multiple intersections and wraps original neighborhood", (
   assert.equal(isInsideCity(250,-125),false);
 });
 test("site interactions occupy in-bounds outdoor coordinates with unique IDs", () => {
-  assert.equal(CITY_SITES.length,8);
+  assert.equal(CITY_SITES.length,14);
   assert.equal(new Set(CITY_SITES.map(s=>s.id)).size,CITY_SITES.length);
   assert.ok(CITY_SITES.every(s=>isInsideCity(s.x,s.z)));
 });

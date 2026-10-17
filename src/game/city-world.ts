@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { installStreetTrees, type StreetTree } from "./realistic-vegetation";
+import { buildShopfronts, type Shopfront } from "./shopfronts";
 import { AVENUES, CROSS_STREETS, CITY_STOPS, CITY_SITES } from "./city-layout";
 import type { Collider } from "./world";
 import { loadRiggedHuman, type LoadedHuman, type HumanKind } from "./human-assets";
@@ -217,6 +218,36 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
   sign("DOWNTOWN",126,15,-48.4,10);
   sign("CENTRAL STATION",157,5,-121,10);
   sign("CITY GALLERY",152,5,-90,7);
+  sign("CITY ROUTE BOARD",71,3.1,-10.35,5.5);
+
+  // Six unmistakable walk-to storefronts. Buildings retain their original
+  // footprints and collision boundaries: signage/glazing does not add obstacles.
+  const awningColors = [0x8e4339,0x304f66,0x655078].map(color=>new THREE.MeshStandardMaterial({color,roughness:0.85}));
+  owned.push(...awningColors);
+  const storefrontAwnings = awningColors.map(mat=>batch(mat,12));
+  const storefrontFrames = batch(dark,90);
+  all.push(...storefrontAwnings,storefrontFrames);
+  const storefronts: Array<Shopfront & {label:string}> = [
+    {kind:"bakery",label:"OLD TOWN BAKERY",x:82,z:-51.42,width:4.8},
+    {kind:"gym",label:"CIVIC FITNESS",x:122,z:-51.42,width:4.8},
+    {kind:"cinema",label:"METRO CINEMA",x:148,z:-51.42,width:4.9},
+    {kind:"laundry",label:"FRESH SPIN LAUNDRY",x:82,z:-93.42,width:4.9},
+    {kind:"bookshop",label:"CORNER BOOKS",x:108,z:-105.88,width:4.7},
+    {kind:"courier",label:"PARCEL DISPATCH",x:162,z:-103.88,width:4.9},
+  ];
+  const shopDisplays = buildShopfronts(scene,storefronts);
+  storefronts.forEach((front,i)=>{
+    const fasciaZ=front.z+0.15;
+    const tint=i%awningColors.length;
+    // Shade above a glazed retail facade and readable sign at pedestrian height.
+    storefrontAwnings[tint].add(front.x,2.72,front.z+0.76,front.width+0.45,0.17,1.25);
+    storefrontFrames.add(front.x,2.45,fasciaZ,front.width+0.2,0.12,0.22);
+    storefrontFrames.add(front.x-front.width/2,1.3,fasciaZ,0.11,2.35,0.2);
+    storefrontFrames.add(front.x+front.width/2,1.3,fasciaZ,0.11,2.35,0.2);
+    storefrontFrames.add(front.x,1.3,fasciaZ,0.10,2.35,0.2);
+    panels.add(front.x,1.36,front.z+0.11,front.width-0.25,2.12,0.14);
+    sign(front.label,front.x,3.55,front.z+0.16,front.width+0.3);
+  });
 
   // Visual transit platforms at validated curb coordinates. Actual transit is in the game/phone.
   for(const stop of CITY_STOPS){
@@ -355,6 +386,7 @@ export function buildCity(scene: THREE.Scene, streetColliders: Collider[]) {
     },
     dispose() {
       releasedTraffic=true;
+      shopDisplays.dispose();
       realisticCityTrees.dispose();
       window.clearTimeout(trafficTimer);
       realTraffic?.dispose();
