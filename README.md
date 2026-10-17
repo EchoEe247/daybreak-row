@@ -4,7 +4,11 @@
 
 > **Status:** Active development. This is a browser game, not an Android APK. The repository is private.
 
-![Daybreak Row gameplay](screenshots/play.png)
+![Daybreak Row — updated downtown gameplay with rigged player character](screenshots/downtown-current.png)
+
+*In-game capture from the updated city build (October 2026; software-rendered QA browser).*
+
+Additional current captures: [Old Town Bakery exterior](screenshots/bakery-current.jpg) · [Corner Books interior](screenshots/bookshop-current.jpg).
 
 ## What you can do
 
