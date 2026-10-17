@@ -2,7 +2,7 @@
 
 **A mobile-first, 3D neighborhood and city life-simulation game.** Explore a coastal neighborhood and its connected city, meet residents, enter businesses, earn money, manage daily needs, and discover new places.
 
-> **Status:** Active development. This is a browser game, not an Android APK. The repository is private.
+> **Status:** Active development. This is a browser game, not an Android APK. Repository visibility is controlled by its owner.
 
 ![Daybreak Row — updated downtown gameplay with rigged player character](screenshots/downtown-current.png)
 
@@ -60,7 +60,7 @@ The input system releases held controls when the tab loses focus or a touch is c
 
 ## Develop locally
 
-**Requirements:** Node.js and npm. Node.js 22 is the development baseline used by the original application scaffold.
+**Requirements:** Node.js and npm. Node.js **24.18.0** is verified on the owner's Termux device (October 17, 2026); the older scaffold originally assumed Node 22. Other environments need their own validation.
 
 ```sh
 git clone https://github.com/EchoEe247/daybreak-row.git
@@ -81,7 +81,7 @@ npm run build
 npm run lint
 ```
 
-The broader `npm test` script also includes tests for the original app scaffold, some of which may contain fixture assumptions unrelated to this customized game.
+**Validation snapshot (October 17, 2026):** 39/39 gameplay tests, typecheck, and production build pass. The broader `npm test` script has existing scaffold/PWA branding fixture failures and `npm run lint` reports two existing findings. See [Runtime and QA](docs/handoff/RUNTIME-AND-QA.md) before interpreting results.
 
 ## Tech and organization
 
@@ -100,6 +100,12 @@ The broader `npm test` script also includes tests for the original app scaffold,
 | `scripts/` | Development, preview, and validation scripts |
 | `screenshots/` | Captured game and control screenshots |
 
+## For outside researchers and AI collaborators
+
+This repository is self-contained for source and documentation research but **does not expose the owner's live phone or local server**. Read [CLAUDE.md](CLAUDE.md), [current game state](docs/handoff/CURRENT-STATE.md), [runtime and QA](docs/handoff/RUNTIME-AND-QA.md), and [shipped asset inventory](docs/handoff/ASSET-BASELINE.md). Claude's structured assignment and deliverables live under [docs/claude/](docs/claude/README.md). For sharing with an external assistant, use the [copy-ready Claude prompt](docs/claude/PROMPT-FOR-CLAUDE.md) and review the [temporary public-access checklist](docs/handoff/TEMPORARY-PUBLIC-ACCESS.md).
+
+The [screenshot guide](screenshots/README.md) distinguishes current game captures from outdated previews.
+
 ## Development notes
 
 The project started from a Grok Build export and was adapted for local Android/Termux play, with subsequent city, interior, control, NPC, and environment upgrades.
@@ -116,7 +122,7 @@ Project-specific design and implementation notes:
 
 ## Assets, attribution, and access
 
-The repository is **private**; it does not grant a public license for the game's original code or art. Third-party assets retain their respective licenses. In particular:
+The project currently has **no general open-source license for its original code or art**. Even if the owner temporarily makes the repository public for research, public visibility **does not** grant unrestricted reuse or remove third-party attribution requirements. Third-party assets retain their respective licenses. In particular:
 
 - Environmental and street assets documented in the manifests/provenance files are sourced under **CC0**.
 - Human rigs and animations include **MIT-licensed Microsoft assets**; preserve the notice in `public/humans/LICENSE-Microsoft-MIT.txt` if distributing them.
