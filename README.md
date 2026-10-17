@@ -106,6 +106,8 @@ This repository is self-contained for source and documentation research but **do
 
 The [screenshot guide](screenshots/README.md) distinguishes current game captures from outdated previews.
 
+[Independent realism asset research](docs/research/README.md) includes researched replacement/addition candidates and a mobile-first integration plan. It is maintained separately from Claude's pending findings.
+
 ## Development notes
 
 The project started from a Grok Build export and was adapted for local Android/Termux play, with subsequent city, interior, control, NPC, and environment upgrades.
